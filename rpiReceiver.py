@@ -33,10 +33,27 @@ ARDUINO2 = 6
 #username = 'T_obias-de'
 scope = 'user-read-currently-playing'
 
-print("Server started. Going to init spotify connection.")
+#print("Server started. Going to init spotify connection.")
 #token = spotipy.util.prompt_for_user_token(
 #    username, scope, redirect_uri='http://127.0.0.1:8080/callback')
-print("Spotifiy connection established.")
+#print("Spotifiy connection established.")
+
+
+# Retrieves the current IP address
+# Source: https://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(0)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
+
 
 #shows the time while running
 class show_route(threading.Thread):
@@ -204,7 +221,8 @@ brightness=255
 soc = socket.socket()
 #host ="127.0.0.1" #soc.gethostname() #"192.168.0.5"
 
-host= ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr']
+#host= ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr']
+host=get_ip()
 
 port = 15439
 print(host)
