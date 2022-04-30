@@ -10,7 +10,8 @@ from luma.core.legacy import text, show_message
 from luma.core.legacy.font import proportional, CP437_FONT, TINY_FONT, SINCLAIR_FONT, LCD_FONT
 from mvg_api import *
 
-
+import asyncio
+import python_weather
 
 from mvg_api import *
 from datetime import *
@@ -29,14 +30,9 @@ ARDUINO1 = 13
 ARDUINO2 = 6 
 
 
-
-#username = 'T_obias-de'
 scope = 'user-read-currently-playing'
-
-#print("Server started. Going to init spotify connection.")
-#token = spotipy.util.prompt_for_user_token(
-#    username, scope, redirect_uri='http://127.0.0.1:8080/callback')
-#print("Spotifiy connection established.")
+username = "T_obias@gmx.de"
+token = "invalid"#spotipy.util.prompt_for_user_token(username, scope, "http://127.0.0.1:8080/callback")
 
 
 # Retrieves the current IP address
@@ -53,6 +49,53 @@ def get_ip():
     finally:
         s.close()
     return IP
+
+
+# Loosly follows https://github.com/vierofernando/python-weather
+async def getweather(device):
+    client = python_weather.Client(format=python_weather.METRIC)
+    weather = await client.find("Munich")
+    weatherstring=str(weather.current.temperature)+"°C "+str(weather.current.feels_like)+" "+str(weather.current.wind_display)
+    show_message(device, weatherstring, fill="white", font=proportional(CP437_FONT), scroll_delay=0.02)
+    pubWeather=weatherstring
+
+#pubWeather=""
+#show song title between time
+class show_weather(threading.Thread):
+    def __init__(self, name):
+        threading.Thread.__init__(self)
+        self.name = name
+
+    def run(self):
+        serial = spi(port=0, device=0, gpio=noop())
+        device = max7219(serial, cascaded=4, block_orientation=-90, rotate=0, blocks_arranged_in_reverse_order=False)
+        # target function of the thread class
+        try:
+            while True:
+                loopa=asyncio.new_event_loop()
+                loopa.run_until_complete(getweather(device))
+                timetosleep.sleep(2)
+ #               print(pubWeather)
+        finally:
+            print('ended')
+
+    def get_id(self):
+
+        # returns id of the respective thread
+        if hasattr(self, '_thread_id'):
+            return self._thread_id
+        for id, thread in threading._active.items():
+            if thread is self:
+                return id
+
+    def raise_exception(self):
+        thread_id = self.get_id()
+        res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id,
+              ctypes.py_object(SystemExit))
+        if res > 1:
+            ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
+            print('Exception raise failure')
+
 
 
 #shows the time while running
@@ -153,7 +196,7 @@ class show_time(threading.Thread):
 
 
 
-#schow song title between time
+#show song title between time
 class show_songTitle(threading.Thread):
     def __init__(self, name):
         threading.Thread.__init__(self)
@@ -165,7 +208,7 @@ class show_songTitle(threading.Thread):
         # target function of the thread class
         try:
             while True:
-                sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
+                sp = spotipy.Spotify(auth=token)
                 current_song = sp.current_user_playing_track()
                 if current_song != None:
                     print(current_song['item']['name'])
@@ -226,6 +269,13 @@ host=get_ip()
 
 port = 15439
 print(host)
+
+serial = spi(port=0, device=0, gpio=noop())
+device = max7219(serial, cascaded=4, block_orientation=-90, rotate=0, blocks_arranged_in_reverse_order=False)
+print("Starting to show IP")
+show_message(device, "IP "+host, fill="white", font=proportional(CP437_FONT),scroll_delay=0.1)
+print("IP message ended")
+
 soc.bind((host, port))
 soc.listen(5)
 conn, addr = soc.accept()
@@ -276,6 +326,15 @@ try:
                  t1.join()
                  t1=None
             t1 = show_songTitle('Thread 1')
+            t1.start()
+            conn, addr = soc.accept()
+        elif msg == "weather":
+            message_to_send = "weather was received".encode("UTF-8")
+            if t1 is not None:
+                 t1.raise_exception()
+                 t1.join()
+                 t1=None
+            t1 = show_weather('Thread 1')
             t1.start()
             conn, addr = soc.accept()
 
