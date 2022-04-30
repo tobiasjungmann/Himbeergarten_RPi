@@ -21,6 +21,7 @@ import socket
 import netifaces as ni
 import RPi.GPIO as GPIO
 import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
 
 RELAIS1 =19
 RELAIS2 = 26
@@ -29,11 +30,13 @@ ARDUINO2 = 6
 
 
 
-username = 'T_obias-de'
+#username = 'T_obias-de'
 scope = 'user-read-currently-playing'
 
-token = spotipy.util.prompt_for_user_token(
-    username, scope, redirect_uri='http://127.0.0.1:8080/callback')
+print("Server started. Going to init spotify connection.")
+#token = spotipy.util.prompt_for_user_token(
+#    username, scope, redirect_uri='http://127.0.0.1:8080/callback')
+print("Spotifiy connection established.")
 
 #shows the time while running
 class show_route(threading.Thread):
@@ -145,7 +148,7 @@ class show_songTitle(threading.Thread):
         # target function of the thread class
         try:
             while True:
-                sp = spotipy.Spotify(auth=token)
+                sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
                 current_song = sp.current_user_playing_track()
                 if current_song != None:
                     print(current_song['item']['name'])
