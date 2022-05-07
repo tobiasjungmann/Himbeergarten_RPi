@@ -28,6 +28,10 @@ RELAIS1 =19
 RELAIS2 = 26
 ARDUINO1 = 13
 ARDUINO2 = 6 
+OUTLET1 = 14
+OUTLET2 = 3
+OUTLET3 = 4
+
 
 
 scope = 'user-read-currently-playing'
@@ -245,6 +249,11 @@ GPIO.setup(RELAIS1, GPIO.OUT)
 GPIO.setup(RELAIS2, GPIO.OUT)
 GPIO.setup(ARDUINO1, GPIO.OUT)
 GPIO.setup(ARDUINO2, GPIO.OUT)
+GPIO.setup(OUTLET1, GPIO.OUT)
+GPIO.setup(OUTLET2, GPIO.OUT)
+GPIO.setup(OUTLET3, GPIO.OUT)
+
+
 relais1activated = False
 relais2activated = False
 arduino1activated = False
@@ -254,6 +263,13 @@ GPIO.output(RELAIS1, GPIO.LOW)
 GPIO.output(RELAIS2, GPIO.LOW)
 GPIO.output(ARDUINO1, GPIO.LOW)
 GPIO.output(ARDUINO2, GPIO.LOW)
+GPIO.output(OUTLET1, GPIO.LOW)
+GPIO.output(OUTLET2, GPIO.LOW)
+GPIO.output(OUTLET3, GPIO.LOW)
+
+outlet1activated = False
+outlet2activated = False
+outlet3activated = False
 
 
 brightness=255
@@ -389,7 +405,6 @@ try:
                 GPIO.output(ARDUINO1, GPIO.HIGH)
             arduino1activated=not arduino1activated
             conn, addr = soc.accept()
-
         elif msg == "arduino2":
             message_to_send = "arduino2 was received".encode("UTF-8")
             if arduino2activated:
@@ -398,6 +413,32 @@ try:
                 GPIO.output(ARDUINO2, GPIO.HIGH)
             arduino2activated=not arduino2activated
             conn, addr = soc.accept()
+
+        elif msg == "outlet1":
+            message_to_send = "outlet1 was received".encode("UTF-8")
+            if outlet1activated:
+                GPIO.output(OUTLET1, GPIO.LOW)
+            else:
+                GPIO.output(OUTLET1, GPIO.HIGH)
+            outlet1activated=not outlet1activated
+            conn, addr = soc.accept()
+        elif msg == "outlet2":
+            message_to_send = "outlet2 was received".encode("UTF-8")
+            if outlet2activated:
+                GPIO.output(OUTLET2, GPIO.LOW)
+            else:
+                GPIO.output(OUTLET2, GPIO.HIGH)
+            outlet2activated=not outlet2activated
+            conn, addr = soc.accept()
+        elif msg == "outlet3":
+            message_to_send = "outlet3 was received".encode("UTF-8")
+            if outlet3activated:
+                GPIO.output(OUTLET3, GPIO.LOW)
+            else:
+                GPIO.output(OUTLET3, GPIO.HIGH)
+            outlet3activated=not outlet3activated
+            conn, addr = soc.accept()
+
         else:
             message_to_send = "Error: something wrong was send.".encode("UTF-8")
             conn, addr = soc.accept()
