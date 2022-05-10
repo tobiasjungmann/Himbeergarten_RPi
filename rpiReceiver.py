@@ -1,3 +1,5 @@
+#!/home/pi/bin/python
+
 import re
 import time as timetosleep
 import argparse
@@ -23,6 +25,8 @@ import netifaces as ni
 import RPi.GPIO as GPIO
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+
+import sys
 
 RELAIS1 =19
 RELAIS2 = 26
@@ -354,7 +358,7 @@ try:
             t1.start()
             conn, addr = soc.accept()
 
-        elif msg == "deactivate":
+        elif msg == "standby":
             message_to_send = "deaktivate was received".encode("UTF-8")
             if t1 is not None:
                 t1.raise_exception()
@@ -374,11 +378,10 @@ try:
                  device.contrast(brightness)
             conn, addr = soc.accept()
 
-        elif msg == "shutdown":
+        elif msg == "quit":
             message_to_send = "shutdown was received".encode("UTF-8")
             soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
-            soc.shtdown(1)
-            soc.close()
+            soc.shutdown(1)
             exit()
         elif msg == "relais1":
             message_to_send = "relais1 was received".encode("UTF-8")
@@ -438,6 +441,13 @@ try:
                 GPIO.output(OUTLET3, GPIO.HIGH)
             outlet3activated=not outlet3activated
             conn, addr = soc.accept()
+#        elif msg=="quit":
+#            device.cleanup()
+#            soc.close()
+#            sys.exit()
+#        elif msg=="standby":
+#            message_to_send = "standby was received.".encode("UTF-8")
+#            conn, addr = soc.accept()
 
         else:
             message_to_send = "Error: something wrong was send.".encode("UTF-8")
