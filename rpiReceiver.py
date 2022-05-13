@@ -102,7 +102,7 @@ async def getweather(device):
     weather = await client.find("Munich")
     weatherString = str(weather.current.temperature) + "°C " + str(weather.current.feels_like) + " " + str(
         weather.current.wind_display)
-    show_message(device, weatherString, fill="white", font=proportional(CP437_FONT), scroll_delay=0.02)
+    show_message(device, weatherString, fill="white", font=proportional(CP437_FONT))#, scroll_delay=0.02)
 
 
 # show song title between time
@@ -158,38 +158,37 @@ class show_route(threading.Thread):
                                  font=proportional(CP437_FONT))
 
                     for route in routes:
-                        departure = route['departure_datetime']
-                        arrival = route['arrival_datetime']
-
-                        text(device, (0, 0), str(departure.hour).zfill(2) + ":" + str(departure.minute).zfill(2),
-                             fill="white", font=proportional(CP437_FONT))
+                        departure=route['departure_datetime']
+                        arrival=route['arrival_datetime']
+                        with canvas(device) as draw:
+                            text(draw, (0, 0), str(departure.hour).zfill(2)+":"+str(departure.minute).zfill(2), fill="white", font=proportional(CP437_FONT))
                         timetosleep.sleep(3)
-                        device.contrast(50)
-                        text(device, (0, 0), str(arrival.hour).zfill(2) + ":" + str(arrival.minute).zfill(2),
-                             fill="white", font=proportional(CP437_FONT))
+                        with canvas(device) as draw:
+                            device.contrast(50)
+                            text(draw, (0, 0), str(arrival.hour).zfill(2)+":"+str(arrival.minute).zfill(2), fill="white", font=proportional(CP437_FONT))
                         timetosleep.sleep(1)
-                        device.contrast(200)
-
+                        with canvas(device) as draw:
+                            device.contrast(200)
         finally:
             print('ended')
 
 
-def get_id(self):
-    # returns id of the respective thread
-    if hasattr(self, '_thread_id'):
-        return self._thread_id
-    for id, thread in threading._active.items():
-        if thread is self:
-            return id
+    def get_id(self):
+       # returns id of the respective thread
+        if hasattr(self, '_thread_id'):
+            return self._thread_id
+        for id, thread in threading._active.items():
+            if thread is self:
+                return id
 
 
-def raise_exception(self):
-    thread_id = self.get_id()
-    res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id,
+    def raise_exception(self):
+        thread_id = self.get_id()
+        res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id,
                                                      ctypes.py_object(SystemExit))
-    if res > 1:
-        ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
-        print('Exception raise failure')
+        if res > 1:
+            ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
+            print('Exception raise failure')
 
 
 # shows the time while running
@@ -202,8 +201,9 @@ class showTime(threading.Thread):
         try:
             while True:
                 t = datetime.now(tz=None)
-                text(device, (0, 0), str(t.hour).zfill(2) + ":" + str(t.minute).zfill(2), fill="white",
-                     font=proportional(CP437_FONT))
+                with canvas(device) as draw:
+                    text(draw, (0, 0), str(t.hour).zfill(2) + ":" + str(t.minute).zfill(2), fill="white",
+                         font=proportional(CP437_FONT))
                 timetosleep.sleep(1)
         finally:
             print('ended')
@@ -275,7 +275,7 @@ soc = socket.socket()
 host = get_ip()
 
 print("Starting to show IP")
-show_message(device, "IP " + host, fill="white", font=proportional(CP437_FONT), scroll_delay=0.1)
+show_message(device, "IP " + host, fill="white", font=proportional(CP437_FONT))#, scroll_delay=0.1)
 print("IP message ended")
 
 soc.bind((host, port))
