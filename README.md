@@ -22,6 +22,8 @@ Setup "Firebase": ``sudo -H pip install firebase-admin``
 
 Setup "GPIOs": ``pip install RPi.GPIO``
 
+Setup "gRPC": ``pip install grpcio-tools``
+
 ### Setup Libraries
 
 Setup MAX7219 Library: Follow the steps in the [installation manual](https://luma-led-matrix.readthedocs.io/en/latest/install.html) and connect the matrix to the correct GPIO Pins.
