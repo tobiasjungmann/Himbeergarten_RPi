@@ -1,41 +1,21 @@
 #!/home/pi/bin/python
 # -*- coding: utf-8 -*-
-import os
-import sys
 from concurrent import futures
-import logging
-import socket
-import re
-import time as timetosleep
-import argparse
 
 from luma.led_matrix.device import max7219
 from luma.core.interface.serial import spi, noop
-from luma.core.render import canvas
-from luma.core.virtual import viewport
-from luma.core.legacy import text, show_message
-from luma.core.legacy.font import proportional, CP437_FONT, TINY_FONT, SINCLAIR_FONT, LCD_FONT
-from mvg_api import *
 
-import asyncio
-import python_weather
-
-from mvg_api import *
-from datetime import *
-
-import threading
-import ctypes
 import socket
-import netifaces as ni
 import RPi.GPIO as GPIO
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
-
-import sys
 
 import grpc
-from proto.communication_pb2 import GPIOReply, StatusReply
+
+from matrix.showMVV import showMVV
+from matrix.showSpotify import showSpotify
+from matrix.showWeather import show_weather
+from proto.communication_pb2 import GPIOReply, StatusReply,EmptyMsg,MatrixState
 from proto.communication_pb2_grpc import CommunicatorServicer, add_CommunicatorServicer_to_server
+from matrix.showTime import showTime
 
 # Used GPIO Pins
 RELAIS1_GPIO = 19
@@ -48,23 +28,15 @@ OUTLET_2_GPIO = 3
 OUTLET_3_GPIO = 4
 outlets_gpio = [OUTLET_1_GPIO, OUTLET_2_GPIO, OUTLET_3_GPIO]
 outlets_state = [False,False,False]
+matrix_thread_array=[None]
 
 serial = spi(port=0, device=0, gpio=noop())
 device = max7219(serial, cascaded=4, block_orientation=-90, rotate=0, blocks_arranged_in_reverse_order=False)
 brightness = 255
 
-spotify_scope = 'user-read-currently-playing'
-spotify_username = "invalid"
-spotify_token = "invalid"  # spotipy.util.prompt_for_user_token(username, scope, "http://127.0.0.1:8080/callback")
-
 PORT_TESTING = 8010
 PORT_PRODUCTION = 12345
 port = PORT_TESTING
-
-DEFAULT_STARTING_POINT = "Josef Wirt Weg"
-DEFAULT_DESTINATION = "Dachau"
-
-matrix_thread = None
 
 
 class CommunicatorServicer(CommunicatorServicer):
@@ -76,8 +48,37 @@ class CommunicatorServicer(CommunicatorServicer):
             GPIO.output(outlets_gpio[request.outletId], GPIO.LOW)
         outlets_state[request.outletId] = request.on
         return GPIOReply(on=outlets_state[request.outletId])
+
     def getStatus(self, request, context):
         return StatusReply(outlets=outlets_state)
+
+    def matrixSetActivated(self, request, context):
+        return EmptyMsg()
+    def matrixSetMode(self, request, context):
+        if matrix_thread_array[0] is not None:
+            matrix_thread_array[0].raise_exception()
+            matrix_thread_array[0].join()
+            matrix_thread_array[0] = None
+        #else:
+        #    device=max7219(serial, cascaded=4, block_orientation=-90, rotate=0, blocks_arranged_in_reverse_order=False)
+
+
+        if request.state==MatrixState.MATRIX_TIME:
+            matrix_thread_array[0] = showTime('Thread 1',device)
+        elif request.state == MatrixState.MATRIX_WEATHER:
+            matrix_thread_array[0] = show_weather('Thread 1',device)
+        elif request.state == MatrixState.MATRIX_SPOTIFY:
+           matrix_thread_array[0] = showSpotify('Thread 1',device)
+        elif request.state == MatrixState.MATRIX_MVV:
+           matrix_thread_array[0] = showMVV('Thread 1',device)
+
+        if request.state == MatrixState.MATRIX_NONE:
+            device.cleanup()
+        else:
+            matrix_thread_array[0].start()
+        return EmptyMsg()
+    def matrixSetBrightness(self, request, context):
+        return EmptyMsg()
 
 
 def serve(address):
@@ -92,8 +93,6 @@ def serve(address):
     print("Waiting for connections...")
     server.wait_for_termination()
     print("Terminated.")
-# todo problem: innerhalb des files fehlt einmal der richtige import mit.proto
-
 
 def get_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -107,13 +106,6 @@ def get_ip():
     finally:
         s.close()
     return IP
-
-
-def shutdwonCurrentThread(t1):
-    if t1 is not None:
-        t1.raise_exception()
-        t1.join()
-        t1 = None
 
 
 def init_gpios():
@@ -134,8 +126,11 @@ def init_gpios():
     GPIO.output(ARDUINO2_GPIO, GPIO.LOW)
 
 
+
 if __name__ == '__main__':
     host = get_ip()
     print(host)
     init_gpios()
+    matrix_thread_array[0]= showTime('Thread 1', device)
+    matrix_thread_array[0].start()
     serve(host)
