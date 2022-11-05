@@ -28,8 +28,8 @@ message EmptyMsg{
 }
 
 message StatusReply{
-  repeated GPIORequest outlets = 1;
-  repeated GPIORequest arduinos = 2;
+  repeated bool outlets = 1;
+  repeated bool arduinos = 2;
   int32 matrixBrightness = 3;
   bool matrixActivated = 4;
 }

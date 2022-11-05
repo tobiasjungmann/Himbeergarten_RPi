@@ -34,7 +34,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import sys
 
 import grpc
-from proto.communication_pb2 import GPIOReply
+from proto.communication_pb2 import GPIOReply, StatusReply
 from proto.communication_pb2_grpc import CommunicatorServicer, add_CommunicatorServicer_to_server
 
 # Used GPIO Pins
@@ -76,9 +76,10 @@ class CommunicatorServicer(CommunicatorServicer):
             GPIO.output(outlets_gpio[request.outletId], GPIO.LOW)
         outlets_state[request.outletId] = request.on
         return GPIOReply(on=outlets_state[request.outletId])
+    def getStatus(self, request, context):
+        return StatusReply(outlets=outlets_state)
 
 
-# todo problem: innerhalb des files fehlt einmal der richtige import mit.proto
 def serve(address):
     print("Starting Server...")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
@@ -91,6 +92,7 @@ def serve(address):
     print("Waiting for connections...")
     server.wait_for_termination()
     print("Terminated.")
+# todo problem: innerhalb des files fehlt einmal der richtige import mit.proto
 
 
 def get_ip():
