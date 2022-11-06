@@ -47,7 +47,7 @@ class CommunicatorServicer(CommunicatorServicer):
         else:
             GPIO.output(outlets_gpio[request.outletId], GPIO.LOW)
         outlets_state[request.outletId] = request.on
-        return GPIOReply(on=outlets_state[request.outletId])
+        return GPIOReply(statusList=outlets_state)
 
     def getStatus(self, request, context):
         return StatusReply(outlets=outlets_state)

@@ -19,7 +19,7 @@ message GPIORequest{
 }
 
 message GPIOReply{
-  bool on = 1;
+  repeated bool statusList = 1;
 }
 
 message EmptyMsg{
