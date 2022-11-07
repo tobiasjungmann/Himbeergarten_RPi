@@ -30,13 +30,14 @@ class show_weather(threading.Thread):
         device_wrapper[0]=device
 
     def run(self):
+        print('Weather thread stated')
         try:
             while True:
                 loopa = asyncio.new_event_loop()
                 loopa.run_until_complete(getweather(device_wrapper[0]))
                 timetosleep.sleep(2)
         finally:
-            print('ended')
+            print('Weather thread ended')
 
     def get_id(self):
         if hasattr(self, '_thread_id'):

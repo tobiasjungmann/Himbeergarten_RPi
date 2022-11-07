@@ -26,10 +26,9 @@ message EmptyMsg{
 }
 
 message StatusReply{
-  repeated bool outlets = 1;
-  repeated bool arduinos = 2;
-  int32 matrixBrightness = 3;
-  bool matrixActivated = 4;
+  repeated bool gpios = 1;
+  int32 matrixBrightness = 2;
+  MatrixState matrixState = 3;
 }
 
 message MatrixBrightnessRequest{
@@ -64,4 +63,6 @@ enum MatrixState{
   MATRIX_WEATHER = 2;
   MATRIX_SPOTIFY = 3;
   MATRIX_MVV = 4;
+  MATRIX_STANDBY = 5;
+  MATRIX_TERMINATE = 6;
 }

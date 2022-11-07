@@ -24,6 +24,7 @@ class showSpotify(threading.Thread):
         device_wrapper[0]=device
 
     def run(self):
+        print('Spotify thread started')
         try:
             while True:
                 sp = spotipy.Spotify(auth=spotify_token)
@@ -37,7 +38,7 @@ class showSpotify(threading.Thread):
                         font=proportional(CP437_FONT))
                     timetosleep.sleep(1)
         finally:
-            print('ended')
+            print('Spotify thread ended')
 
     def get_id(self):
 

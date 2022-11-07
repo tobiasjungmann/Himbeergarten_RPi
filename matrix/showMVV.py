@@ -30,6 +30,7 @@ class showMVV(threading.Thread):
     def run(self):
 
         # target function of the thread class
+        print('MVV thread started start: ', startingPoint,'  destination: ',destination)
         try:
             while True:
                 while True:
@@ -55,7 +56,7 @@ class showMVV(threading.Thread):
                         with canvas(device_wrapper[0]) as draw:
                             device_wrapper[0].contrast(200)
         finally:
-            print('ended')
+            print('MVV thread ended')
 
     def get_id(self):
         # returns id of the respective thread

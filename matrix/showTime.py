@@ -6,10 +6,7 @@ from datetime import *
 import time as timetosleep
 import ctypes
 
-from luma.led_matrix.device import max7219
-from luma.core.interface.serial import spi, noop
 from luma.core.render import canvas
-from luma.core.virtual import viewport
 from luma.core.legacy import text, show_message
 from luma.core.legacy.font import proportional, CP437_FONT, TINY_FONT, SINCLAIR_FONT, LCD_FONT
 
@@ -22,6 +19,7 @@ class showTime(threading.Thread):
         device_wrapper[0]=device
 
     def run(self):
+        print('Clock thread started')
         try:
             while True:
                 t = datetime.now(tz=None)
@@ -30,7 +28,7 @@ class showTime(threading.Thread):
                          font=proportional(CP437_FONT))
                 timetosleep.sleep(1)
         finally:
-            print('ended')
+            print('Clock thread ended')
 
     def get_id(self):
 
