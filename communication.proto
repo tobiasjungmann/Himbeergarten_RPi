@@ -7,14 +7,14 @@ service Communicator {
   rpc arduinoOn(GPIORequest) returns (GPIOReply) {}
   rpc getStatus(EmptyMsg) returns (StatusReply) {}
 
-  rpc matrixSetMode(MatrixChangeModeRequest) returns (EmptyMsg) {}
+  rpc matrixSetMode(MatrixChangeModeRequest) returns (MatrixChangeModeReply) {}
   rpc matrixSetActivated(MatrixActivationRequest) returns (EmptyMsg) {}
   rpc matrixSetBrightness(MatrixBrightnessRequest) returns (EmptyMsg) {}
 
 }
 
 message GPIORequest{
-  int32 outletId = 1;
+  GPIOInstances id = 1;
   bool on = 2;
 }
 
@@ -42,12 +42,26 @@ message MatrixActivationRequest{
 
 message MatrixChangeModeRequest{
   MatrixState state = 1;
+  string start = 2;
+  string destination = 3;
+}
+
+message MatrixChangeModeReply{
+  MatrixState state = 1;
+}
+
+enum GPIOInstances{
+  GPIO_OUTLET_1 = 0;
+  GPIO_OUTLET_2 = 1;
+  GPIO_OUTLET_3 = 2;
+  GPIO_ARDUINO_1 = 3;
+  GPIO_ARDUINO_2 = 4;
 }
 
 enum MatrixState{
-  MATRIX_NONE=0;
-  MATRIX_TIME=1;
-  MATRIX_WEATHER=2;
-  MATRIX_SPOTIFY=3;
-  MATRIX_MVV=4;
+  MATRIX_NONE = 0;
+  MATRIX_TIME = 1;
+  MATRIX_WEATHER = 2;
+  MATRIX_SPOTIFY = 3;
+  MATRIX_MVV = 4;
 }

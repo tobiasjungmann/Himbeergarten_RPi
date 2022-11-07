@@ -20,14 +20,14 @@ from matrix.showTime import showTime
 # Used GPIO Pins
 RELAIS1_GPIO = 19
 RELAIS2_GPIO = 26
+
 ARDUINO1_GPIO = 13
 ARDUINO2_GPIO = 6
-
 OUTLET_1_GPIO = 14
 OUTLET_2_GPIO = 3
 OUTLET_3_GPIO = 4
-outlets_gpio = [OUTLET_1_GPIO, OUTLET_2_GPIO, OUTLET_3_GPIO]
-outlets_state = [False,False,False]
+outlets_gpio = [OUTLET_1_GPIO, OUTLET_2_GPIO, OUTLET_3_GPIO,ARDUINO1_GPIO, ARDUINO2_GPIO]
+outlets_state = [False,False,False,False,False]
 matrix_thread_array=[None]
 
 serial = spi(port=0, device=0, gpio=noop())
@@ -41,12 +41,12 @@ port = PORT_TESTING
 
 class CommunicatorServicer(CommunicatorServicer):
     def outletOn(self, request, context):
-        print("Received OutletRequest for ", request.outletId)
+        print("Received OutletRequest for ", request.id)
         if request.on:
-            GPIO.output(outlets_gpio[request.outletId], GPIO.HIGH)
+            GPIO.output(outlets_gpio[request.id], GPIO.HIGH)
         else:
-            GPIO.output(outlets_gpio[request.outletId], GPIO.LOW)
-        outlets_state[request.outletId] = request.on
+            GPIO.output(outlets_gpio[request.id], GPIO.LOW)
+        outlets_state[request.id] = request.on
         return GPIOReply(statusList=outlets_state)
 
     def getStatus(self, request, context):
@@ -70,7 +70,7 @@ class CommunicatorServicer(CommunicatorServicer):
         elif request.state == MatrixState.MATRIX_SPOTIFY:
            matrix_thread_array[0] = showSpotify('Thread 1',device)
         elif request.state == MatrixState.MATRIX_MVV:
-           matrix_thread_array[0] = showMVV('Thread 1',device)
+           matrix_thread_array[0] = showMVV('Thread 1',device,request.start,request.destination)
 
         if request.state == MatrixState.MATRIX_NONE:
             device.cleanup()

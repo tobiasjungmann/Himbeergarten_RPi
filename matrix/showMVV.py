@@ -17,12 +17,15 @@ device_wrapper = [None]
 startingPoint = "Josef Wirt Weg"
 destination = "Dachau"
 
+
 # shows the time while running
 class showMVV(threading.Thread):
-    def __init__(self, name, device):
+    def __init__(self, name, device, start, dest):
         threading.Thread.__init__(self)
         self.name = name
-        device_wrapper[0]=device
+        device_wrapper[0] = device
+        self.startingPoint = start
+        self.destination = dest
 
     def run(self):
 
@@ -38,35 +41,34 @@ class showMVV(threading.Thread):
                                  font=proportional(CP437_FONT))
 
                     for route in routes:
-                        departure=route['departure_datetime']
-                        arrival=route['arrival_datetime']
+                        departure = route['departure_datetime']
+                        arrival = route['arrival_datetime']
                         with canvas(device_wrapper[0]) as draw:
-                            text(draw, (0, 0), str(departure.hour).zfill(2)+":"+str(departure.minute).zfill(2), fill="white", font=proportional(CP437_FONT))
+                            text(draw, (0, 0), str(departure.hour).zfill(2) + ":" + str(departure.minute).zfill(2),
+                                 fill="white", font=proportional(CP437_FONT))
                         timetosleep.sleep(3)
                         with canvas(device_wrapper[0]) as draw:
                             device_wrapper[0].contrast(50)
-                            text(draw, (0, 0), str(arrival.hour).zfill(2)+":"+str(arrival.minute).zfill(2), fill="white", font=proportional(CP437_FONT))
+                            text(draw, (0, 0), str(arrival.hour).zfill(2) + ":" + str(arrival.minute).zfill(2),
+                                 fill="white", font=proportional(CP437_FONT))
                         timetosleep.sleep(1)
                         with canvas(device_wrapper[0]) as draw:
                             device_wrapper[0].contrast(200)
         finally:
             print('ended')
 
-
     def get_id(self):
-       # returns id of the respective thread
+        # returns id of the respective thread
         if hasattr(self, '_thread_id'):
             return self._thread_id
         for id, thread in threading._active.items():
             if thread is self:
                 return id
 
-
     def raise_exception(self):
         thread_id = self.get_id()
         res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id,
-                                                     ctypes.py_object(SystemExit))
+                                                         ctypes.py_object(SystemExit))
         if res > 1:
             ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
             print('Exception raise failure')
-
