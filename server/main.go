@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"net"
+	"server/models"
 )
 
 var (
@@ -21,12 +22,6 @@ type StorageServer struct {
 	db *gorm.DB
 }
 
-type Product struct {
-	gorm.Model
-	Code  string
-	Price uint
-}
-
 func main() {
 	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	if err != nil {
@@ -34,7 +29,7 @@ func main() {
 	}
 
 	// Migrate the schema
-	db.AutoMigrate(&Product{})
+	db.AutoMigrate(&models.Plant{})
 
 	flag.Parse()
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
@@ -49,6 +44,7 @@ func main() {
 	}
 }
 
-func (s *StorageServer) StoreHumidityEntry(ctx context.Context, in *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
+func (s *StorageServer) StoreHumidityEntry(ctx context.Context, request *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
+	log.Println("New Humidity Entry for Plant %i with value %i", request.PlantId, request.GetHumidity())
 	return &pb.StoreHumidityReply{}, nil
 }

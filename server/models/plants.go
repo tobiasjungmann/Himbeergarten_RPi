@@ -1,4 +1,4 @@
-package main
+package models
 
 type Plant struct {
 	Plant      int32  `gorm:"primary_key;AUTO_INCREMENT;column:plant;type:int;not null;" json:"plant" `
