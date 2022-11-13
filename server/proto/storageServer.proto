@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package smart_home;
+option go_package = "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto";
+service StorageServer {
+  rpc storeHumidityEntry(StoreHumidityRequest) returns (StoreHumidityReply) {}
+}
+
+message StoreHumidityRequest{
+  int32 plantId = 1;
+  int32 humidity = 2;
+}
+
+message StoreHumidityReply{
+}
