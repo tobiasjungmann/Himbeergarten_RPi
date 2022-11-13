@@ -1,15 +1,25 @@
 package main
 
 import (
-	log "github.com/sirupsen/logrus"
+	"context"
+	"flag"
+	"fmt"
+	pb "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto"
+	"google.golang.org/grpc"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"os"
+	"log"
+	"net"
 )
 
-const (
-	httpPort = ":12346"
+var (
+	port = flag.Int("port", 12346, "The server port")
 )
+
+type StorageServer struct {
+	pb.UnimplementedStorageServerServer
+	db *gorm.DB
+}
 
 type Product struct {
 	gorm.Model
@@ -18,31 +28,27 @@ type Product struct {
 }
 
 func main() {
-	var conn gorm.Dialector
-	shouldAutoMigrate := false
-	if dbHost := os.Getenv("DB_DSN"); dbHost != "" {
-		log.Info("Connecting to dsn")
-		conn = mysql.Open(dbHost)
-	} else {
-		log.Info("Switching to test.db")
-		conn = sqlite.Open("test.db")
-		shouldAutoMigrate = true
+	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
 	}
 
-	// Create
-	db.Create(&Product{Code: "D42", Price: 100})
+	// Migrate the schema
+	db.AutoMigrate(&Product{})
 
-	// Read
-	var product Product
-	db.First(&product, 1)                 // find product with integer primary key
-	db.First(&product, "code = ?", "D42") // find product with code D42
+	flag.Parse()
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
+	pb.RegisterStorageServerServer(s, &StorageServer{})
+	log.Printf("server listening at %v", lis.Addr())
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+}
 
-	// Update - update product's price to 200
-	db.Model(&product).Update("Price", 200)
-	// Update - update multiple fields
-	db.Model(&product).Updates(Product{Price: 200, Code: "F42"}) // non-zero fields
-	db.Model(&product).Updates(map[string]interface{}{"Price": 200, "Code": "F42"})
-
-	// Delete - delete product
-	db.Delete(&product, 1)
+func (s *StorageServer) StoreHumidityEntry(ctx context.Context, in *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
+	return &pb.StoreHumidityReply{}, nil
 }
