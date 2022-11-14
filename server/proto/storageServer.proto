@@ -3,8 +3,20 @@ syntax = "proto3";
 package smart_home;
 option go_package = "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto";
 option java_package = "com.example.rpicommunicator_v1";
+
+import "google/protobuf/timestamp.proto";
+
 service StorageServer {
+  rpc getOverviewAllPlants(GetAllPlantsRequest) returns (AllPlantsReply) {}
+  //rpc getPlantById(GetPlantRequest) returns (PlantReply) {}
+  rpc getAdditionalDataPlant(GetAdditionalDataPlantRequest) returns (GetAdditionalDataPlantReply) {}
+  rpc deletePlant(DeletePlantRequest) returns (DeletePlantReply) {}
+  //rpc getThumbnails(GetThumbnailsRequest) returns (PlantThumbnailReply) {}
+  //  rpc editPlant(PlantMsg) returns (PlantMsg) {}
+  rpc addNewPlant(AddPlantRequest) returns (PlantOverviewMsg) {}
+
   rpc storeHumidityEntry(StoreHumidityRequest) returns (StoreHumidityReply) {}
+  rpc getHumidityForPlant(StoreHumidityRequest) returns (StoreHumidityReply) {}
 }
 
 message StoreHumidityRequest{
@@ -12,5 +24,66 @@ message StoreHumidityRequest{
   int32 humidity = 2;
 }
 
+message DeletePlantReply{
+}
+
+message GetThumbnailsRequest{
+}
+
+message GetAllPlantsRequest{
+}
+
+message PlantThumbnailReply{
+  repeated PlantThumbnailMsg images = 1;
+}
+message PlantThumbnailMsg{
+  int32 plantId = 1;
+  bytes image = 2;
+}
+
+message  GetPlantRequest{
+  int32 plant = 1;
+}
+
+message  DeletePlantRequest{
+  int32 plant = 1;
+}
+
 message StoreHumidityReply{
+}
+
+message AllPlantsReply{
+  repeated PlantOverviewMsg plants = 1;
+}
+
+message AddPlantRequest {
+  string Name = 2;
+  string Info = 3;
+  string Type = 4;
+  repeated bytes images = 5;
+}
+
+message PlantOverviewMsg{
+  int32 plant = 1;
+  string Name = 2;
+  string Info = 3;
+  string Type = 4;
+  bytes thumbnail = 9;
+}
+
+message GetAdditionalDataPlantRequest{
+  int32 plantId = 1;
+}
+
+message HumidityMsg{
+  int32 humidity = 1;
+  google.protobuf.Timestamp timestamp = 2;
+}
+
+message GetAdditionalDataPlantReply{
+  int32 plant = 1;
+  int32 SensorSlot = 2;
+  google.protobuf.Timestamp Watered = 3;
+  repeated HumidityMsg Humidity = 4;
+  repeated bytes images = 5;
 }
