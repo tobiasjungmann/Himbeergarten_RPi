@@ -22,7 +22,15 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StorageServerClient interface {
+	GetOverviewAllPlants(ctx context.Context, in *GetAllPlantsRequest, opts ...grpc.CallOption) (*AllPlantsReply, error)
+	//rpc getPlantById(GetPlantRequest) returns (PlantReply) {}
+	GetAdditionalDataPlant(ctx context.Context, in *GetAdditionalDataPlantRequest, opts ...grpc.CallOption) (*GetAdditionalDataPlantReply, error)
+	DeletePlant(ctx context.Context, in *DeletePlantRequest, opts ...grpc.CallOption) (*DeletePlantReply, error)
+	//rpc getThumbnails(GetThumbnailsRequest) returns (PlantThumbnailReply) {}
+	//  rpc editPlant(PlantMsg) returns (PlantMsg) {}
+	AddNewPlant(ctx context.Context, in *AddPlantRequest, opts ...grpc.CallOption) (*PlantOverviewMsg, error)
 	StoreHumidityEntry(ctx context.Context, in *StoreHumidityRequest, opts ...grpc.CallOption) (*StoreHumidityReply, error)
+	GetHumidityForPlant(ctx context.Context, in *StoreHumidityRequest, opts ...grpc.CallOption) (*StoreHumidityReply, error)
 }
 
 type storageServerClient struct {
@@ -31,6 +39,42 @@ type storageServerClient struct {
 
 func NewStorageServerClient(cc grpc.ClientConnInterface) StorageServerClient {
 	return &storageServerClient{cc}
+}
+
+func (c *storageServerClient) GetOverviewAllPlants(ctx context.Context, in *GetAllPlantsRequest, opts ...grpc.CallOption) (*AllPlantsReply, error) {
+	out := new(AllPlantsReply)
+	err := c.cc.Invoke(ctx, "/smart_home.StorageServer/getOverviewAllPlants", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *storageServerClient) GetAdditionalDataPlant(ctx context.Context, in *GetAdditionalDataPlantRequest, opts ...grpc.CallOption) (*GetAdditionalDataPlantReply, error) {
+	out := new(GetAdditionalDataPlantReply)
+	err := c.cc.Invoke(ctx, "/smart_home.StorageServer/getAdditionalDataPlant", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *storageServerClient) DeletePlant(ctx context.Context, in *DeletePlantRequest, opts ...grpc.CallOption) (*DeletePlantReply, error) {
+	out := new(DeletePlantReply)
+	err := c.cc.Invoke(ctx, "/smart_home.StorageServer/deletePlant", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *storageServerClient) AddNewPlant(ctx context.Context, in *AddPlantRequest, opts ...grpc.CallOption) (*PlantOverviewMsg, error) {
+	out := new(PlantOverviewMsg)
+	err := c.cc.Invoke(ctx, "/smart_home.StorageServer/addNewPlant", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *storageServerClient) StoreHumidityEntry(ctx context.Context, in *StoreHumidityRequest, opts ...grpc.CallOption) (*StoreHumidityReply, error) {
@@ -42,11 +86,28 @@ func (c *storageServerClient) StoreHumidityEntry(ctx context.Context, in *StoreH
 	return out, nil
 }
 
+func (c *storageServerClient) GetHumidityForPlant(ctx context.Context, in *StoreHumidityRequest, opts ...grpc.CallOption) (*StoreHumidityReply, error) {
+	out := new(StoreHumidityReply)
+	err := c.cc.Invoke(ctx, "/smart_home.StorageServer/getHumidityForPlant", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // StorageServerServer is the server API for StorageServer service.
 // All implementations must embed UnimplementedStorageServerServer
 // for forward compatibility
 type StorageServerServer interface {
+	GetOverviewAllPlants(context.Context, *GetAllPlantsRequest) (*AllPlantsReply, error)
+	//rpc getPlantById(GetPlantRequest) returns (PlantReply) {}
+	GetAdditionalDataPlant(context.Context, *GetAdditionalDataPlantRequest) (*GetAdditionalDataPlantReply, error)
+	DeletePlant(context.Context, *DeletePlantRequest) (*DeletePlantReply, error)
+	//rpc getThumbnails(GetThumbnailsRequest) returns (PlantThumbnailReply) {}
+	//  rpc editPlant(PlantMsg) returns (PlantMsg) {}
+	AddNewPlant(context.Context, *AddPlantRequest) (*PlantOverviewMsg, error)
 	StoreHumidityEntry(context.Context, *StoreHumidityRequest) (*StoreHumidityReply, error)
+	GetHumidityForPlant(context.Context, *StoreHumidityRequest) (*StoreHumidityReply, error)
 	mustEmbedUnimplementedStorageServerServer()
 }
 
@@ -54,8 +115,23 @@ type StorageServerServer interface {
 type UnimplementedStorageServerServer struct {
 }
 
+func (UnimplementedStorageServerServer) GetOverviewAllPlants(context.Context, *GetAllPlantsRequest) (*AllPlantsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOverviewAllPlants not implemented")
+}
+func (UnimplementedStorageServerServer) GetAdditionalDataPlant(context.Context, *GetAdditionalDataPlantRequest) (*GetAdditionalDataPlantReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAdditionalDataPlant not implemented")
+}
+func (UnimplementedStorageServerServer) DeletePlant(context.Context, *DeletePlantRequest) (*DeletePlantReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePlant not implemented")
+}
+func (UnimplementedStorageServerServer) AddNewPlant(context.Context, *AddPlantRequest) (*PlantOverviewMsg, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddNewPlant not implemented")
+}
 func (UnimplementedStorageServerServer) StoreHumidityEntry(context.Context, *StoreHumidityRequest) (*StoreHumidityReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StoreHumidityEntry not implemented")
+}
+func (UnimplementedStorageServerServer) GetHumidityForPlant(context.Context, *StoreHumidityRequest) (*StoreHumidityReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetHumidityForPlant not implemented")
 }
 func (UnimplementedStorageServerServer) mustEmbedUnimplementedStorageServerServer() {}
 
@@ -68,6 +144,78 @@ type UnsafeStorageServerServer interface {
 
 func RegisterStorageServerServer(s grpc.ServiceRegistrar, srv StorageServerServer) {
 	s.RegisterService(&StorageServer_ServiceDesc, srv)
+}
+
+func _StorageServer_GetOverviewAllPlants_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllPlantsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServerServer).GetOverviewAllPlants(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/smart_home.StorageServer/getOverviewAllPlants",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServerServer).GetOverviewAllPlants(ctx, req.(*GetAllPlantsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StorageServer_GetAdditionalDataPlant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAdditionalDataPlantRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServerServer).GetAdditionalDataPlant(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/smart_home.StorageServer/getAdditionalDataPlant",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServerServer).GetAdditionalDataPlant(ctx, req.(*GetAdditionalDataPlantRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StorageServer_DeletePlant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePlantRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServerServer).DeletePlant(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/smart_home.StorageServer/deletePlant",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServerServer).DeletePlant(ctx, req.(*DeletePlantRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StorageServer_AddNewPlant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddPlantRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServerServer).AddNewPlant(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/smart_home.StorageServer/addNewPlant",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServerServer).AddNewPlant(ctx, req.(*AddPlantRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _StorageServer_StoreHumidityEntry_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -88,6 +236,24 @@ func _StorageServer_StoreHumidityEntry_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StorageServer_GetHumidityForPlant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StoreHumidityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServerServer).GetHumidityForPlant(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/smart_home.StorageServer/getHumidityForPlant",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServerServer).GetHumidityForPlant(ctx, req.(*StoreHumidityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // StorageServer_ServiceDesc is the grpc.ServiceDesc for StorageServer service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -96,8 +262,28 @@ var StorageServer_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*StorageServerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "getOverviewAllPlants",
+			Handler:    _StorageServer_GetOverviewAllPlants_Handler,
+		},
+		{
+			MethodName: "getAdditionalDataPlant",
+			Handler:    _StorageServer_GetAdditionalDataPlant_Handler,
+		},
+		{
+			MethodName: "deletePlant",
+			Handler:    _StorageServer_DeletePlant_Handler,
+		},
+		{
+			MethodName: "addNewPlant",
+			Handler:    _StorageServer_AddNewPlant_Handler,
+		},
+		{
 			MethodName: "storeHumidityEntry",
 			Handler:    _StorageServer_StoreHumidityEntry_Handler,
+		},
+		{
+			MethodName: "getHumidityForPlant",
+			Handler:    _StorageServer_GetHumidityForPlant_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

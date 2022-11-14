@@ -44,7 +44,86 @@
         }
       }
     },
-    "smart_homestoreHumidityReply": {
+    "smart_homeAllPlantsReply": {
+      "type": "object",
+      "properties": {
+        "plants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/smart_homePlantOverviewMsg"
+          }
+        }
+      }
+    },
+    "smart_homeDeletePlantReply": {
+      "type": "object"
+    },
+    "smart_homeGetAdditionalDataPlantReply": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "SensorSlot": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Watered": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "Humidity": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/smart_homeHumidityMsg"
+          }
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "byte"
+          }
+        }
+      }
+    },
+    "smart_homeHumidityMsg": {
+      "type": "object",
+      "properties": {
+        "humidity": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "smart_homePlantOverviewMsg": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Info": {
+          "type": "string"
+        },
+        "Type": {
+          "type": "string"
+        },
+        "thumbnail": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "smart_homeStoreHumidityReply": {
       "type": "object"
     }
   }
