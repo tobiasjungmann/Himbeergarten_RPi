@@ -32,22 +32,9 @@ func main() {
 	// Migrate the schema
 	db.AutoMigrate(&models.Plant{}, &models.HumidityEntry{})
 
-	createPlant(db)
 	rpcServer(db)
 
 }
-
-func createPlant(db *gorm.DB) {
-	errCreatePlant := db.Model(&models.Plant{}).Create(&models.Plant{
-		Name:       "Testplant",
-		Humidity:   1,
-		SensorSlot: 14,
-	}).Error
-	if errCreatePlant != nil {
-		log.Fatalf("Error while creating a new dish name rating.")
-	}
-}
-
 func rpcServer(db *gorm.DB) {
 	flag.Parse()
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
@@ -80,4 +67,53 @@ func (s *StorageServer) StoreHumidityEntry(ctx context.Context, request *pb.Stor
 		log.Println("New Humidity Entry for Plant %i with value %i", request.PlantId, request.GetHumidity())
 	}
 	return &pb.StoreHumidityReply{}, nil
+}
+
+func (s *StorageServer) AddNewPlant(ctx context.Context, request *pb.AddPlantRequest) (*pb.PlantOverviewMsg, error) {
+	// todo store additional images
+	plant := models.Plant{
+		Name: request.Name,
+		Info: request.Info,
+		Type: request.Type,
+	}
+	errCreatePlant := s.db.Model(&models.Plant{}).Create(&plant).Error
+	if errCreatePlant != nil {
+		log.Fatalf("Error: Unable to create the new Plant. Errormessage: %s", errCreatePlant.Error())
+	}
+	// todo return thumbnail
+	return &pb.PlantOverviewMsg{Plant: plant.Plant, Name: plant.Name,
+		Info:      plant.Info,
+		Type:      plant.Type,
+		Thumbnail: nil}, nil
+}
+
+func (s *StorageServer) DeletePlant(ctx context.Context, request *pb.DeletePlantRequest) (*pb.DeletePlantReply, error) {
+	errGetPlant := s.db.Model(&models.Plant{}).Delete(&models.Plant{}, request.Plant).Error
+	if errGetPlant != nil {
+		log.Fatalf("Error: Plant with Id: %d could not be deleted. Errormessage: %s", errGetPlant.Error())
+	}
+	return &pb.DeletePlantReply{}, nil
+}
+
+func (s *StorageServer) GetOverviewAllPlants(ctx context.Context, request *pb.GetAllPlantsRequest) (*pb.AllPlantsReply, error) {
+	/*	errGetPlant := s.db.Model(&models.Plant{}).Delete(&models.Plant{}, request.Plant).Error
+		if errGetPlant != nil {
+			log.Fatalf("Error: Plant with Id: %d could not be deleted. Errormessage: %s", errGetPlant.Error())
+		}
+
+		// todo query and parse plants to the reply
+		&pb.PlantOverviewMsg{Plant: plant.Plant, Name: plant.Name,
+			Info:      plant.Info,
+			Type:      plant.Type,
+			Thumbnail: nil}
+	*/
+	return &pb.AllPlantsReply{}, nil
+}
+
+func (s *StorageServer) GetAdditionalDataPlant(ctx context.Context, request *pb.GetAdditionalDataPlantRequest) (*pb.GetAdditionalDataPlantReply, error) {
+	/*errGetPlant := s.db.Model(&models.Plant{}).Delete(&models.Plant{}, request.Plant).Error
+	if errGetPlant != nil {
+		log.Fatalf("Error: Plant with Id: %d could not be deleted. Errormessage: %s", errGetPlant.Error())
+	}*/
+	return &pb.GetAdditionalDataPlantReply{}, nil
 }
