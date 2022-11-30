@@ -10,10 +10,11 @@ service StorageServer {
   rpc getOverviewAllPlants(GetAllPlantsRequest) returns (AllPlantsReply) {}
   //rpc getPlantById(GetPlantRequest) returns (PlantReply) {}
   rpc getAdditionalDataPlant(GetAdditionalDataPlantRequest) returns (GetAdditionalDataPlantReply) {}
-  rpc deletePlant(DeletePlantRequest) returns (DeletePlantReply) {}
   //rpc getThumbnails(GetThumbnailsRequest) returns (PlantThumbnailReply) {}
-  //  rpc editPlant(PlantMsg) returns (PlantMsg) {}
+
+  // Also used to update a plant with the same id if it already exists
   rpc addNewPlant(AddPlantRequest) returns (PlantOverviewMsg) {}
+  rpc deletePlant(DeletePlantRequest) returns (DeletePlantReply) {}
 
   rpc storeHumidityEntry(StoreHumidityRequest) returns (StoreHumidityReply) {}
   rpc getHumidityForPlant(StoreHumidityRequest) returns (StoreHumidityReply) {}
@@ -22,9 +23,6 @@ service StorageServer {
 message StoreHumidityRequest{
   int32 plantId = 1;
   int32 humidity = 2;
-}
-
-message DeletePlantReply{
 }
 
 message GetThumbnailsRequest{
@@ -49,6 +47,9 @@ message  DeletePlantRequest{
   int32 plant = 1;
 }
 
+message DeletePlantReply{
+}
+
 message StoreHumidityReply{
 }
 
@@ -57,18 +58,19 @@ message AllPlantsReply{
 }
 
 message AddPlantRequest {
+  int32 plantId=1;
   string Name = 2;
   string Info = 3;
-  string Type = 4;
+  int32 gpioSensorSlot=4;
   repeated bytes images = 5;
 }
 
 message PlantOverviewMsg{
-  int32 plant = 1;
+  int32 plantId = 1;
   string Name = 2;
   string Info = 3;
-  string Type = 4;
-  bytes thumbnail = 9;
+  int32 gpioSensorSlot=4;
+  bytes thumbnail = 5;
 }
 
 message GetAdditionalDataPlantRequest{

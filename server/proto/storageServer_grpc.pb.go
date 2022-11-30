@@ -25,10 +25,9 @@ type StorageServerClient interface {
 	GetOverviewAllPlants(ctx context.Context, in *GetAllPlantsRequest, opts ...grpc.CallOption) (*AllPlantsReply, error)
 	//rpc getPlantById(GetPlantRequest) returns (PlantReply) {}
 	GetAdditionalDataPlant(ctx context.Context, in *GetAdditionalDataPlantRequest, opts ...grpc.CallOption) (*GetAdditionalDataPlantReply, error)
-	DeletePlant(ctx context.Context, in *DeletePlantRequest, opts ...grpc.CallOption) (*DeletePlantReply, error)
-	//rpc getThumbnails(GetThumbnailsRequest) returns (PlantThumbnailReply) {}
-	//  rpc editPlant(PlantMsg) returns (PlantMsg) {}
+	// Also used to update a plant with the same id if it already exists
 	AddNewPlant(ctx context.Context, in *AddPlantRequest, opts ...grpc.CallOption) (*PlantOverviewMsg, error)
+	DeletePlant(ctx context.Context, in *DeletePlantRequest, opts ...grpc.CallOption) (*DeletePlantReply, error)
 	StoreHumidityEntry(ctx context.Context, in *StoreHumidityRequest, opts ...grpc.CallOption) (*StoreHumidityReply, error)
 	GetHumidityForPlant(ctx context.Context, in *StoreHumidityRequest, opts ...grpc.CallOption) (*StoreHumidityReply, error)
 }
@@ -59,18 +58,18 @@ func (c *storageServerClient) GetAdditionalDataPlant(ctx context.Context, in *Ge
 	return out, nil
 }
 
-func (c *storageServerClient) DeletePlant(ctx context.Context, in *DeletePlantRequest, opts ...grpc.CallOption) (*DeletePlantReply, error) {
-	out := new(DeletePlantReply)
-	err := c.cc.Invoke(ctx, "/smart_home.StorageServer/deletePlant", in, out, opts...)
+func (c *storageServerClient) AddNewPlant(ctx context.Context, in *AddPlantRequest, opts ...grpc.CallOption) (*PlantOverviewMsg, error) {
+	out := new(PlantOverviewMsg)
+	err := c.cc.Invoke(ctx, "/smart_home.StorageServer/addNewPlant", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *storageServerClient) AddNewPlant(ctx context.Context, in *AddPlantRequest, opts ...grpc.CallOption) (*PlantOverviewMsg, error) {
-	out := new(PlantOverviewMsg)
-	err := c.cc.Invoke(ctx, "/smart_home.StorageServer/addNewPlant", in, out, opts...)
+func (c *storageServerClient) DeletePlant(ctx context.Context, in *DeletePlantRequest, opts ...grpc.CallOption) (*DeletePlantReply, error) {
+	out := new(DeletePlantReply)
+	err := c.cc.Invoke(ctx, "/smart_home.StorageServer/deletePlant", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -102,10 +101,9 @@ type StorageServerServer interface {
 	GetOverviewAllPlants(context.Context, *GetAllPlantsRequest) (*AllPlantsReply, error)
 	//rpc getPlantById(GetPlantRequest) returns (PlantReply) {}
 	GetAdditionalDataPlant(context.Context, *GetAdditionalDataPlantRequest) (*GetAdditionalDataPlantReply, error)
-	DeletePlant(context.Context, *DeletePlantRequest) (*DeletePlantReply, error)
-	//rpc getThumbnails(GetThumbnailsRequest) returns (PlantThumbnailReply) {}
-	//  rpc editPlant(PlantMsg) returns (PlantMsg) {}
+	// Also used to update a plant with the same id if it already exists
 	AddNewPlant(context.Context, *AddPlantRequest) (*PlantOverviewMsg, error)
+	DeletePlant(context.Context, *DeletePlantRequest) (*DeletePlantReply, error)
 	StoreHumidityEntry(context.Context, *StoreHumidityRequest) (*StoreHumidityReply, error)
 	GetHumidityForPlant(context.Context, *StoreHumidityRequest) (*StoreHumidityReply, error)
 	mustEmbedUnimplementedStorageServerServer()
@@ -121,11 +119,11 @@ func (UnimplementedStorageServerServer) GetOverviewAllPlants(context.Context, *G
 func (UnimplementedStorageServerServer) GetAdditionalDataPlant(context.Context, *GetAdditionalDataPlantRequest) (*GetAdditionalDataPlantReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAdditionalDataPlant not implemented")
 }
-func (UnimplementedStorageServerServer) DeletePlant(context.Context, *DeletePlantRequest) (*DeletePlantReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeletePlant not implemented")
-}
 func (UnimplementedStorageServerServer) AddNewPlant(context.Context, *AddPlantRequest) (*PlantOverviewMsg, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddNewPlant not implemented")
+}
+func (UnimplementedStorageServerServer) DeletePlant(context.Context, *DeletePlantRequest) (*DeletePlantReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePlant not implemented")
 }
 func (UnimplementedStorageServerServer) StoreHumidityEntry(context.Context, *StoreHumidityRequest) (*StoreHumidityReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StoreHumidityEntry not implemented")
@@ -182,24 +180,6 @@ func _StorageServer_GetAdditionalDataPlant_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
-func _StorageServer_DeletePlant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeletePlantRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(StorageServerServer).DeletePlant(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/smart_home.StorageServer/deletePlant",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StorageServerServer).DeletePlant(ctx, req.(*DeletePlantRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _StorageServer_AddNewPlant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AddPlantRequest)
 	if err := dec(in); err != nil {
@@ -214,6 +194,24 @@ func _StorageServer_AddNewPlant_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StorageServerServer).AddNewPlant(ctx, req.(*AddPlantRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StorageServer_DeletePlant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePlantRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServerServer).DeletePlant(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/smart_home.StorageServer/deletePlant",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServerServer).DeletePlant(ctx, req.(*DeletePlantRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -270,12 +268,12 @@ var StorageServer_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _StorageServer_GetAdditionalDataPlant_Handler,
 		},
 		{
-			MethodName: "deletePlant",
-			Handler:    _StorageServer_DeletePlant_Handler,
-		},
-		{
 			MethodName: "addNewPlant",
 			Handler:    _StorageServer_AddNewPlant_Handler,
+		},
+		{
+			MethodName: "deletePlant",
+			Handler:    _StorageServer_DeletePlant_Handler,
 		},
 		{
 			MethodName: "storeHumidityEntry",

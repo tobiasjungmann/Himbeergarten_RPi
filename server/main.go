@@ -4,13 +4,13 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/tobiasjungmann/Himbeergarten_RPi/server/models"
 	pb "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto"
 	"google.golang.org/grpc"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"log"
 	"net"
-	"server/models"
 	"time"
 )
 
@@ -35,9 +35,24 @@ func main() {
 	rpcServer(db)
 
 }
+
+func GetOutboundIP() net.IP {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddr.IP
+}
+
 func rpcServer(db *gorm.DB) {
+
 	flag.Parse()
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+	localIp := GetOutboundIP().String()
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", localIp, *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -71,20 +86,23 @@ func (s *StorageServer) StoreHumidityEntry(ctx context.Context, request *pb.Stor
 
 func (s *StorageServer) AddNewPlant(ctx context.Context, request *pb.AddPlantRequest) (*pb.PlantOverviewMsg, error) {
 	// todo store additional images
+	log.Println("New plant added")
 	plant := models.Plant{
-		Name: request.Name,
-		Info: request.Info,
-		Type: request.Type,
+		Name:       request.Name,
+		Info:       request.Info,
+		SensorSlot: request.GpioSensorSlot,
 	}
 	errCreatePlant := s.db.Model(&models.Plant{}).Create(&plant).Error
 	if errCreatePlant != nil {
 		log.Fatalf("Error: Unable to create the new Plant. Errormessage: %s", errCreatePlant.Error())
 	}
 	// todo return thumbnail
-	return &pb.PlantOverviewMsg{Plant: plant.Plant, Name: plant.Name,
-		Info:      plant.Info,
-		Type:      plant.Type,
-		Thumbnail: nil}, nil
+	return &pb.PlantOverviewMsg{
+		PlantId:        plant.Plant,
+		Name:           plant.Name,
+		Info:           plant.Info,
+		GpioSensorSlot: plant.SensorSlot,
+		Thumbnail:      nil}, nil
 }
 
 func (s *StorageServer) DeletePlant(ctx context.Context, request *pb.DeletePlantRequest) (*pb.DeletePlantReply, error) {

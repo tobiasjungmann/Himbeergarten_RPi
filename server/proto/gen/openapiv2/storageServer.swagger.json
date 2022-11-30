@@ -104,7 +104,7 @@
     "smart_homePlantOverviewMsg": {
       "type": "object",
       "properties": {
-        "plant": {
+        "plantId": {
           "type": "integer",
           "format": "int32"
         },
@@ -114,8 +114,9 @@
         "Info": {
           "type": "string"
         },
-        "Type": {
-          "type": "string"
+        "gpioSensorSlot": {
+          "type": "integer",
+          "format": "int32"
         },
         "thumbnail": {
           "type": "string",
