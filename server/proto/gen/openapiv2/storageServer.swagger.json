@@ -58,6 +58,36 @@
     "smart_homeDeletePlantReply": {
       "type": "object"
     },
+    "smart_homeDeviceOverviewMsg": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "type": {
+          "$ref": "#/definitions/smart_homeDeviceTypes"
+        },
+        "interface": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        }
+      }
+    },
+    "smart_homeDeviceTypes": {
+      "type": "string",
+      "enum": [
+        "DEVICE_UNDEFINED",
+        "DEVICE_RPI",
+        "DEVICE_ARDUINO_NANO"
+      ],
+      "default": "DEVICE_UNDEFINED"
+    },
     "smart_homeGetAdditionalDataPlantReply": {
       "type": "object",
       "properties": {
@@ -65,13 +95,8 @@
           "type": "integer",
           "format": "int32"
         },
-        "SensorSlot": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "Watered": {
-          "type": "string",
-          "format": "date-time"
+        "gpio": {
+          "$ref": "#/definitions/smart_homeGpioIdentifierMsg"
         },
         "Humidity": {
           "type": "array",
@@ -88,6 +113,43 @@
         }
       }
     },
+    "smart_homeGetConnectedDevicesResponse": {
+      "type": "object",
+      "properties": {
+        "devices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/smart_homeDeviceOverviewMsg"
+          }
+        }
+      }
+    },
+    "smart_homeGetRequestedSensorStatesResponse": {
+      "type": "object",
+      "properties": {
+        "sensors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/smart_homeRequestedSensorMsg"
+          }
+        }
+      }
+    },
+    "smart_homeGpioIdentifierMsg": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "deviceSerialInterfaceName": {
+          "type": "string"
+        },
+        "gpioName": {
+          "type": "string"
+        }
+      }
+    },
     "smart_homeHumidityMsg": {
       "type": "object",
       "properties": {
@@ -96,8 +158,8 @@
           "format": "int32"
         },
         "timestamp": {
-          "type": "string",
-          "format": "date-time"
+          "type": "number",
+          "format": "float"
         }
       }
     },
@@ -114,13 +176,25 @@
         "Info": {
           "type": "string"
         },
-        "gpioSensorSlot": {
-          "type": "integer",
-          "format": "int32"
+        "gpio": {
+          "$ref": "#/definitions/smart_homeGpioIdentifierMsg"
         },
         "thumbnail": {
           "type": "string",
           "format": "byte"
+        }
+      }
+    },
+    "smart_homeRequestedSensorMsg": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sensorId": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },

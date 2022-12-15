@@ -23,13 +23,13 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StorageServerClient interface {
 	GetOverviewAllPlants(ctx context.Context, in *GetAllPlantsRequest, opts ...grpc.CallOption) (*AllPlantsReply, error)
-	//rpc getPlantById(GetPlantRequest) returns (PlantReply) {}
 	GetAdditionalDataPlant(ctx context.Context, in *GetAdditionalDataPlantRequest, opts ...grpc.CallOption) (*GetAdditionalDataPlantReply, error)
 	// Also used to update a plant with the same id if it already exists
 	AddNewPlant(ctx context.Context, in *AddPlantRequest, opts ...grpc.CallOption) (*PlantOverviewMsg, error)
-	DeletePlant(ctx context.Context, in *DeletePlantRequest, opts ...grpc.CallOption) (*DeletePlantReply, error)
+	DeletePlant(ctx context.Context, in *PlantRequest, opts ...grpc.CallOption) (*DeletePlantReply, error)
+	GetRequestedSensorStates(ctx context.Context, in *GetRequestedSensorStatesRequest, opts ...grpc.CallOption) (*GetRequestedSensorStatesResponse, error)
 	StoreHumidityEntry(ctx context.Context, in *StoreHumidityRequest, opts ...grpc.CallOption) (*StoreHumidityReply, error)
-	GetHumidityForPlant(ctx context.Context, in *StoreHumidityRequest, opts ...grpc.CallOption) (*StoreHumidityReply, error)
+	GetConnectedDevicesOverview(ctx context.Context, in *GetConnectedDevicesRequest, opts ...grpc.CallOption) (*GetConnectedDevicesResponse, error)
 }
 
 type storageServerClient struct {
@@ -67,9 +67,18 @@ func (c *storageServerClient) AddNewPlant(ctx context.Context, in *AddPlantReque
 	return out, nil
 }
 
-func (c *storageServerClient) DeletePlant(ctx context.Context, in *DeletePlantRequest, opts ...grpc.CallOption) (*DeletePlantReply, error) {
+func (c *storageServerClient) DeletePlant(ctx context.Context, in *PlantRequest, opts ...grpc.CallOption) (*DeletePlantReply, error) {
 	out := new(DeletePlantReply)
 	err := c.cc.Invoke(ctx, "/smart_home.StorageServer/deletePlant", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *storageServerClient) GetRequestedSensorStates(ctx context.Context, in *GetRequestedSensorStatesRequest, opts ...grpc.CallOption) (*GetRequestedSensorStatesResponse, error) {
+	out := new(GetRequestedSensorStatesResponse)
+	err := c.cc.Invoke(ctx, "/smart_home.StorageServer/getRequestedSensorStates", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -85,9 +94,9 @@ func (c *storageServerClient) StoreHumidityEntry(ctx context.Context, in *StoreH
 	return out, nil
 }
 
-func (c *storageServerClient) GetHumidityForPlant(ctx context.Context, in *StoreHumidityRequest, opts ...grpc.CallOption) (*StoreHumidityReply, error) {
-	out := new(StoreHumidityReply)
-	err := c.cc.Invoke(ctx, "/smart_home.StorageServer/getHumidityForPlant", in, out, opts...)
+func (c *storageServerClient) GetConnectedDevicesOverview(ctx context.Context, in *GetConnectedDevicesRequest, opts ...grpc.CallOption) (*GetConnectedDevicesResponse, error) {
+	out := new(GetConnectedDevicesResponse)
+	err := c.cc.Invoke(ctx, "/smart_home.StorageServer/getConnectedDevicesOverview", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -99,13 +108,13 @@ func (c *storageServerClient) GetHumidityForPlant(ctx context.Context, in *Store
 // for forward compatibility
 type StorageServerServer interface {
 	GetOverviewAllPlants(context.Context, *GetAllPlantsRequest) (*AllPlantsReply, error)
-	//rpc getPlantById(GetPlantRequest) returns (PlantReply) {}
 	GetAdditionalDataPlant(context.Context, *GetAdditionalDataPlantRequest) (*GetAdditionalDataPlantReply, error)
 	// Also used to update a plant with the same id if it already exists
 	AddNewPlant(context.Context, *AddPlantRequest) (*PlantOverviewMsg, error)
-	DeletePlant(context.Context, *DeletePlantRequest) (*DeletePlantReply, error)
+	DeletePlant(context.Context, *PlantRequest) (*DeletePlantReply, error)
+	GetRequestedSensorStates(context.Context, *GetRequestedSensorStatesRequest) (*GetRequestedSensorStatesResponse, error)
 	StoreHumidityEntry(context.Context, *StoreHumidityRequest) (*StoreHumidityReply, error)
-	GetHumidityForPlant(context.Context, *StoreHumidityRequest) (*StoreHumidityReply, error)
+	GetConnectedDevicesOverview(context.Context, *GetConnectedDevicesRequest) (*GetConnectedDevicesResponse, error)
 	mustEmbedUnimplementedStorageServerServer()
 }
 
@@ -122,14 +131,17 @@ func (UnimplementedStorageServerServer) GetAdditionalDataPlant(context.Context, 
 func (UnimplementedStorageServerServer) AddNewPlant(context.Context, *AddPlantRequest) (*PlantOverviewMsg, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddNewPlant not implemented")
 }
-func (UnimplementedStorageServerServer) DeletePlant(context.Context, *DeletePlantRequest) (*DeletePlantReply, error) {
+func (UnimplementedStorageServerServer) DeletePlant(context.Context, *PlantRequest) (*DeletePlantReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePlant not implemented")
+}
+func (UnimplementedStorageServerServer) GetRequestedSensorStates(context.Context, *GetRequestedSensorStatesRequest) (*GetRequestedSensorStatesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRequestedSensorStates not implemented")
 }
 func (UnimplementedStorageServerServer) StoreHumidityEntry(context.Context, *StoreHumidityRequest) (*StoreHumidityReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StoreHumidityEntry not implemented")
 }
-func (UnimplementedStorageServerServer) GetHumidityForPlant(context.Context, *StoreHumidityRequest) (*StoreHumidityReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetHumidityForPlant not implemented")
+func (UnimplementedStorageServerServer) GetConnectedDevicesOverview(context.Context, *GetConnectedDevicesRequest) (*GetConnectedDevicesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetConnectedDevicesOverview not implemented")
 }
 func (UnimplementedStorageServerServer) mustEmbedUnimplementedStorageServerServer() {}
 
@@ -199,7 +211,7 @@ func _StorageServer_AddNewPlant_Handler(srv interface{}, ctx context.Context, de
 }
 
 func _StorageServer_DeletePlant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeletePlantRequest)
+	in := new(PlantRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -211,7 +223,25 @@ func _StorageServer_DeletePlant_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: "/smart_home.StorageServer/deletePlant",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StorageServerServer).DeletePlant(ctx, req.(*DeletePlantRequest))
+		return srv.(StorageServerServer).DeletePlant(ctx, req.(*PlantRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StorageServer_GetRequestedSensorStates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequestedSensorStatesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServerServer).GetRequestedSensorStates(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/smart_home.StorageServer/getRequestedSensorStates",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServerServer).GetRequestedSensorStates(ctx, req.(*GetRequestedSensorStatesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -234,20 +264,20 @@ func _StorageServer_StoreHumidityEntry_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
-func _StorageServer_GetHumidityForPlant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(StoreHumidityRequest)
+func _StorageServer_GetConnectedDevicesOverview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetConnectedDevicesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(StorageServerServer).GetHumidityForPlant(ctx, in)
+		return srv.(StorageServerServer).GetConnectedDevicesOverview(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/smart_home.StorageServer/getHumidityForPlant",
+		FullMethod: "/smart_home.StorageServer/getConnectedDevicesOverview",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StorageServerServer).GetHumidityForPlant(ctx, req.(*StoreHumidityRequest))
+		return srv.(StorageServerServer).GetConnectedDevicesOverview(ctx, req.(*GetConnectedDevicesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -276,12 +306,16 @@ var StorageServer_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _StorageServer_DeletePlant_Handler,
 		},
 		{
+			MethodName: "getRequestedSensorStates",
+			Handler:    _StorageServer_GetRequestedSensorStates_Handler,
+		},
+		{
 			MethodName: "storeHumidityEntry",
 			Handler:    _StorageServer_StoreHumidityEntry_Handler,
 		},
 		{
-			MethodName: "getHumidityForPlant",
-			Handler:    _StorageServer_GetHumidityForPlant_Handler,
+			MethodName: "getConnectedDevicesOverview",
+			Handler:    _StorageServer_GetConnectedDevicesOverview_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -8,24 +8,34 @@ import "google/protobuf/timestamp.proto";
 
 service StorageServer {
   rpc getOverviewAllPlants(GetAllPlantsRequest) returns (AllPlantsReply) {}
-  //rpc getPlantById(GetPlantRequest) returns (PlantReply) {}
   rpc getAdditionalDataPlant(GetAdditionalDataPlantRequest) returns (GetAdditionalDataPlantReply) {}
-  //rpc getThumbnails(GetThumbnailsRequest) returns (PlantThumbnailReply) {}
 
   // Also used to update a plant with the same id if it already exists
   rpc addNewPlant(AddPlantRequest) returns (PlantOverviewMsg) {}
-  rpc deletePlant(DeletePlantRequest) returns (DeletePlantReply) {}
+  rpc deletePlant(PlantRequest) returns (DeletePlantReply) {}
 
+  rpc getRequestedSensorStates(GetRequestedSensorStatesRequest) returns (GetRequestedSensorStatesResponse) {}
   rpc storeHumidityEntry(StoreHumidityRequest) returns (StoreHumidityReply) {}
-  rpc getHumidityForPlant(StoreHumidityRequest) returns (StoreHumidityReply) {}
+
+  rpc getConnectedDevicesOverview(GetConnectedDevicesRequest) returns (GetConnectedDevicesResponse){}
+}
+
+message GetRequestedSensorStatesRequest{
+  int32 deviceId = 1;
+}
+
+message GetRequestedSensorStatesResponse{
+  repeated RequestedSensorMsg sensors = 1;
+}
+
+message RequestedSensorMsg{
+  int32 requestId = 1;
+  int32 sensorId = 2;
 }
 
 message StoreHumidityRequest{
-  int32 plantId = 1;
+  int32 requestNumber = 1;
   int32 humidity = 2;
-}
-
-message GetThumbnailsRequest{
 }
 
 message GetAllPlantsRequest{
@@ -39,11 +49,7 @@ message PlantThumbnailMsg{
   bytes image = 2;
 }
 
-message  GetPlantRequest{
-  int32 plant = 1;
-}
-
-message  DeletePlantRequest{
+message  PlantRequest{
   int32 plant = 1;
 }
 
@@ -58,10 +64,10 @@ message AllPlantsReply{
 }
 
 message AddPlantRequest {
-  int32 plantId=1;
+  int32 plantId = 1;
   string Name = 2;
   string Info = 3;
-  int32 gpioSensorSlot=4;
+  int32 gpioSensorSlot = 4;
   repeated bytes images = 5;
 }
 
@@ -69,7 +75,7 @@ message PlantOverviewMsg{
   int32 plantId = 1;
   string Name = 2;
   string Info = 3;
-  int32 gpioSensorSlot=4;
+  GpioIdentifierMsg gpio = 4;
   bytes thumbnail = 5;
 }
 
@@ -79,13 +85,45 @@ message GetAdditionalDataPlantRequest{
 
 message HumidityMsg{
   int32 humidity = 1;
-  google.protobuf.Timestamp timestamp = 2;
+  float timestamp = 2;
+}
+
+message GpioIdentifierMsg{
+  int32 deviceId = 1;
+  string deviceSerialInterfaceName = 2;
+  string gpioName = 3;
 }
 
 message GetAdditionalDataPlantReply{
   int32 plant = 1;
-  int32 SensorSlot = 2;
-  google.protobuf.Timestamp Watered = 3;
+  GpioIdentifierMsg gpio = 2;
   repeated HumidityMsg Humidity = 4;
   repeated bytes images = 5;
+}
+
+message GetConnectedDevicesRequest{
+
+}
+
+message GetConnectedDevicesResponse{
+  repeated DeviceOverviewMsg devices = 1;
+}
+
+message DeviceOverviewMsg{
+  int32 deviceId = 1;
+  DeviceTypes type = 2;
+  string interface = 3;
+  string name = 4;
+  string userId = 5;
+}
+
+enum GpioUser{
+  GPIO_USER_UNDEFINED = 0;
+  GPIO_USER_PLANT = 1;
+  GPIO_USER_RELAIS = 2;
+}
+enum DeviceTypes{
+  DEVICE_UNDEFINED = 0;
+  DEVICE_RPI = 1;
+  DEVICE_ARDUINO_NANO = 2;
 }
