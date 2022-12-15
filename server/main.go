@@ -85,7 +85,6 @@ func (s *StorageServer) StoreHumidityEntry(ctx context.Context, request *pb.Stor
 }
 
 func (s *StorageServer) AddNewPlant(ctx context.Context, request *pb.AddPlantRequest) (*pb.PlantOverviewMsg, error) {
-	// todo store additional images
 	var plant models.Plant
 	result := s.db.Model(&models.Plant{}).
 		First(&plant).
@@ -154,5 +153,13 @@ func (s *StorageServer) GetAdditionalDataPlant(ctx context.Context, request *pb.
 }
 
 func (s *StorageServer) getRequestedSensorStates(ctx context.Context, request *pb.GetRequestedSensorStatesRequest) (*pb.GetRequestedSensorStatesResponse, error) {
+	//request.DeviceId
+	/*var plant models.Plant
+	result := s.db.Model(&models.Plant{}).
+		First(&plant).
+		Where(models.Plant{Plant: request.PlantId})
+	if result.Error != nil {
+		log.WithError(result.Error).Error("Error while querying existing plants.")
+	}*/
 	return &pb.GetRequestedSensorStatesResponse{}, nil
 }
