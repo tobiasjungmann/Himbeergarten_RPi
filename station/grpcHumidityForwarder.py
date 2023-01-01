@@ -1,7 +1,5 @@
 #!/home/pi/bin/python
 # -*- coding: utf-8 -*-
-from datetime import datetime
-
 import grpc
 import proto.storageServer_pb2
 import proto.storageServer_pb2_grpc
@@ -41,8 +39,8 @@ def serial_ports():
     return result
 
 
-def forward_results(ser):
-    line = ser.readline().decode('utf-8').rstrip()
+def forward_results(socket):
+    line = socket.readline().decode('utf-8').rstrip()
     print("Line: ",line)
     if len(line)>0:
         humidityValues = line.split()
@@ -52,13 +50,16 @@ def forward_results(ser):
 
 
 if __name__ == '__main__':
-    print("started")
+    print("Started Arduino Analog Pin Forwarder.")
     with grpc.insecure_channel('192.168.178.97:12346') as channel:
         stub = proto.storageServer_pb2_grpc.StorageServerStub(channel)
         ports = serial_ports()
         print(ports)
-        if len(ports) > 0:
-            ser = serial.Serial(ports[0], 9600, timeout=1)  # ttyUSB0
-            ser.flush()
-            for i in range(4):
+        serial_instances=[]
+        for port in ports:
+            serial_instances.append(serial.Serial(port, 9600, timeout=1))
+            serial_instances[len(serial_instances)].flush()
+
+        for i in range(4):
+            for ser in serial_instances:
                 forward_results(ser)
