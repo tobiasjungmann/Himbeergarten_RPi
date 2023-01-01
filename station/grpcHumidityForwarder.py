@@ -1,13 +1,64 @@
 #!/home/pi/bin/python
 # -*- coding: utf-8 -*-
+from datetime import datetime
+
 import grpc
 import proto.storageServer_pb2
 import proto.storageServer_pb2_grpc
 
+import sys
+import glob
+import serial
+
+
+# https://stackoverflow.com/questions/12090503/listing-available-com-ports-with-python
+def serial_ports():
+    """ Lists serial port names
+
+        :raises EnvironmentError:
+            On unsupported or unknown platforms
+        :returns:
+            A list of the serial ports available on the system
+    """
+    if sys.platform.startswith('win'):
+        ports = ['COM%s' % (i + 1) for i in range(256)]
+    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+        # this excludes your current terminal "/dev/tty"
+        ports = glob.glob('/dev/tty[A-Za-z]*')
+    elif sys.platform.startswith('darwin'):
+        ports = glob.glob('/dev/tty.*')
+    else:
+        raise EnvironmentError('Unsupported platform')
+
+    result = []
+    for port in ports:
+        try:
+            s = serial.Serial(port)
+            s.close()
+            result.append(port)
+        except (OSError, serial.SerialException):
+            pass
+    return result
+
+
+def forward_results(ser):
+    line = ser.readline().decode('utf-8').rstrip()
+    print("Line: ",line)
+    if len(line)>0:
+        humidityValues = line.split()
+        print(humidityValues)
+        for value in humidityValues:
+            response = stub.storeHumidityEntry(proto.storageServer_pb2.StoreHumidityRequest(requestNumber=1, humidity=value))
+
+
 if __name__ == '__main__':
-    print("starting")
-    print("Will try to greet world ...")
+    print("started")
     with grpc.insecure_channel('192.168.178.97:12346') as channel:
         stub = proto.storageServer_pb2_grpc.StorageServerStub(channel)
-        response = stub.storeHumidityEntry(proto.storageServer_pb2.StoreHumidityRequest(requestNumber=1,humidity=7))
-    print("Greeter client received.")
+        ports = serial_ports()
+        print(ports)
+        if len(ports) > 0:
+            ser = serial.Serial(ports[0], 9600, timeout=1)  # ttyUSB0
+            ser.flush()
+            for i in range(4):
+                forward_results(ser)
