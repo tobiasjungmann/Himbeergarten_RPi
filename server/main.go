@@ -8,7 +8,7 @@ import (
 	"github.com/tobiasjungmann/Himbeergarten_RPi/server/models"
 	pb "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto"
 	"google.golang.org/grpc"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"net"
 	"time"
@@ -24,8 +24,12 @@ type StorageServer struct {
 }
 
 func main() {
-	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	s := "user:password@tcp(0.0.0.0:3306)/mydatabase"
+	//s := ""
+	//s:="test.db"
+	db, err := gorm.Open(mysql.Open(s), &gorm.Config{})
 	if err != nil {
+		log.Fatalf("Terminating with error: %v", err)
 		panic("failed to connect database")
 	}
 

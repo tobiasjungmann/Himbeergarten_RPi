@@ -1,0 +1,18 @@
+version: '3'
+volumes:
+  data:
+
+# Very basic as a development base
+services:
+  db:
+    image: mariadb
+    container_name: plant-maria_db
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - data:/var/lib/mysql
+    ports:
+      - "3306:3306"
