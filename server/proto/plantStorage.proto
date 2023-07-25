@@ -6,7 +6,7 @@ option java_package = "com.example.rpicommunicator_v1";
 
 import "google/protobuf/timestamp.proto";
 
-service StorageServer {
+service PlantStorage {
   rpc getOverviewAllPlants(GetAllPlantsRequest) returns (AllPlantsReply) {}
   rpc getAdditionalDataPlant(GetAdditionalDataPlantRequest) returns (GetAdditionalDataPlantReply) {}
 
