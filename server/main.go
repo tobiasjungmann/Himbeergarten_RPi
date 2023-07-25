@@ -18,8 +18,8 @@ var (
 	port = flag.Int("port", 12346, "The server port")
 )
 
-type StorageServer struct {
-	pb.UnimplementedStorageServerServer
+type PlantStorage struct {
+	pb.UnimplementedPlantStorageServer
 	db *gorm.DB
 }
 
@@ -61,14 +61,14 @@ func rpcServer(db *gorm.DB) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterStorageServerServer(s, &StorageServer{db: db})
+	pb.RegisterPlantStorageServer(s, &PlantStorage{db: db})
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }
 
-func (s *StorageServer) StoreHumidityEntry(ctx context.Context, request *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
+func (s *PlantStorage) StoreHumidityEntry(ctx context.Context, request *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
 	var plant *models.Plant
 	errGetPlant := s.db.Model(&models.Plant{}).Where("plant = ?", request.RequestNumber).First(&plant).Error
 	if errGetPlant != nil {
@@ -88,7 +88,7 @@ func (s *StorageServer) StoreHumidityEntry(ctx context.Context, request *pb.Stor
 	return &pb.StoreHumidityReply{}, nil
 }
 
-func (s *StorageServer) AddNewPlant(ctx context.Context, request *pb.AddPlantRequest) (*pb.PlantOverviewMsg, error) {
+func (s *PlantStorage) AddNewPlant(ctx context.Context, request *pb.AddPlantRequest) (*pb.PlantOverviewMsg, error) {
 	var plant models.Plant
 	result := s.db.Model(&models.Plant{}).
 		First(&plant).
@@ -125,7 +125,7 @@ func (s *StorageServer) AddNewPlant(ctx context.Context, request *pb.AddPlantReq
 		Thumbnail: nil}, nil
 }
 
-func (s *StorageServer) DeletePlant(ctx context.Context, request *pb.PlantRequest) (*pb.DeletePlantReply, error) {
+func (s *PlantStorage) DeletePlant(ctx context.Context, request *pb.PlantRequest) (*pb.DeletePlantReply, error) {
 	errGetPlant := s.db.Model(&models.Plant{}).Delete(&models.Plant{}, request.Plant).Error
 	if errGetPlant != nil {
 		log.Fatalf("Error: Plant with Id: %d could not be deleted. Errormessage: %s", errGetPlant.Error())
@@ -133,7 +133,7 @@ func (s *StorageServer) DeletePlant(ctx context.Context, request *pb.PlantReques
 	return &pb.DeletePlantReply{}, nil
 }
 
-func (s *StorageServer) GetOverviewAllPlants(ctx context.Context, request *pb.GetAllPlantsRequest) (*pb.AllPlantsReply, error) {
+func (s *PlantStorage) GetOverviewAllPlants(ctx context.Context, request *pb.GetAllPlantsRequest) (*pb.AllPlantsReply, error) {
 	/*	errGetPlant := s.db.Model(&models.Plant{}).Delete(&models.Plant{}, request.Plant).Error
 		if errGetPlant != nil {
 			log.Fatalf("Error: Plant with Id: %d could not be deleted. Errormessage: %s", errGetPlant.Error())
@@ -148,7 +148,7 @@ func (s *StorageServer) GetOverviewAllPlants(ctx context.Context, request *pb.Ge
 	return &pb.AllPlantsReply{}, nil
 }
 
-func (s *StorageServer) GetAdditionalDataPlant(ctx context.Context, request *pb.GetAdditionalDataPlantRequest) (*pb.GetAdditionalDataPlantReply, error) {
+func (s *PlantStorage) GetAdditionalDataPlant(ctx context.Context, request *pb.GetAdditionalDataPlantRequest) (*pb.GetAdditionalDataPlantReply, error) {
 	/*errGetPlant := s.db.Model(&models.Plant{}).Delete(&models.Plant{}, request.Plant).Error
 	if errGetPlant != nil {
 		log.Fatalf("Error: Plant with Id: %d could not be deleted. Errormessage: %s", errGetPlant.Error())
@@ -156,7 +156,7 @@ func (s *StorageServer) GetAdditionalDataPlant(ctx context.Context, request *pb.
 	return &pb.GetAdditionalDataPlantReply{}, nil
 }
 
-func (s *StorageServer) getRequestedSensorStates(ctx context.Context, request *pb.GetRequestedSensorStatesRequest) (*pb.GetRequestedSensorStatesResponse, error) {
+func (s *PlantStorage) getRequestedSensorStates(ctx context.Context, request *pb.GetRequestedSensorStatesRequest) (*pb.GetRequestedSensorStatesResponse, error) {
 	//request.DeviceId
 	/*var plant models.Plant
 	result := s.db.Model(&models.Plant{}).
