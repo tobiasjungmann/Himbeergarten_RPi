@@ -35,6 +35,8 @@ func main() {
 		panic("failed to connect database")
 	}
 
+	pb.NewPlantStorageClient()
+
 	// Migrate the schema
 	db.AutoMigrate(&models.Plant{}, &models.HumidityEntry{})
 
