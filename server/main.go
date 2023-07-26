@@ -34,9 +34,6 @@ func main() {
 		log.Fatalf("Terminating with error: %v", err)
 		panic("failed to connect database")
 	}
-
-	pb.NewPlantStorageClient()
-
 	// Migrate the schema
 	db.AutoMigrate(&models.Plant{}, &models.HumidityEntry{})
 
