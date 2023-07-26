@@ -8,7 +8,8 @@ import (
 	"github.com/tobiasjungmann/Himbeergarten_RPi/server/models"
 	pb "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto"
 	"google.golang.org/grpc"
-	"gorm.io/driver/mysql"
+	//"gorm.io/driver/mysql"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"net"
 	"time"
@@ -24,10 +25,11 @@ type PlantStorage struct {
 }
 
 func main() {
-	s := "user:password@tcp(0.0.0.0:3306)/mydatabase"
+	//s := "user:password@tcp(0.0.0.0:3306)/mydatabase"
+	//	db, err := gorm.Open(mysql.Open(s), &gorm.Config{})
 	//s := ""
-	//s:="test.db"
-	db, err := gorm.Open(mysql.Open(s), &gorm.Config{})
+	s := "test.db"
+	db, err := gorm.Open(sqlite.Open(s), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Terminating with error: %v", err)
 		panic("failed to connect database")
@@ -40,22 +42,10 @@ func main() {
 
 }
 
-func GetOutboundIP() net.IP {
-	conn, err := net.Dial("udp", "8.8.8.8:80")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer conn.Close()
-
-	localAddr := conn.LocalAddr().(*net.UDPAddr)
-
-	return localAddr.IP
-}
-
 func rpcServer(db *gorm.DB) {
 
 	flag.Parse()
-	localIp := GetOutboundIP().String()
+	localIp := "0.0.0.0" //GetOutboundIP().String()
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", localIp, *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -134,26 +124,47 @@ func (s *PlantStorage) DeletePlant(ctx context.Context, request *pb.PlantRequest
 }
 
 func (s *PlantStorage) GetOverviewAllPlants(ctx context.Context, request *pb.GetAllPlantsRequest) (*pb.AllPlantsReply, error) {
-	/*	errGetPlant := s.db.Model(&models.Plant{}).Delete(&models.Plant{}, request.Plant).Error
-		if errGetPlant != nil {
-			log.Fatalf("Error: Plant with Id: %d could not be deleted. Errormessage: %s", errGetPlant.Error())
-		}
+	var plants []models.Plant
+	result := s.db.Find(&plants)
+	if result.Error != nil {
+		log.Fatalf("Error: Not able to query all plants. Errormessage: %s", result.Error.Error())
+	}
 
-		// todo query and parse plants to the reply
-		&pb.PlantOverviewMsg{Plant: plant.Plant, Name: plant.Name,
-			Info:      plant.Info,
-			Type:      plant.Type,
-			Thumbnail: nil}
-	*/
-	return &pb.AllPlantsReply{}, nil
+	convertedPlants := make([]*pb.PlantOverviewMsg, len(plants))
+
+	for i, v := range convertedPlants {
+		convertedPlants[i] = &pb.PlantOverviewMsg{
+			PlantId:   v.PlantId,
+			Name:      v.Name,
+			Info:      v.Info,
+			Gpio:      nil,
+			Thumbnail: nil,
+		}
+	}
+	return &pb.AllPlantsReply{Plants: convertedPlants}, nil
 }
 
 func (s *PlantStorage) GetAdditionalDataPlant(ctx context.Context, request *pb.GetAdditionalDataPlantRequest) (*pb.GetAdditionalDataPlantReply, error) {
-	/*errGetPlant := s.db.Model(&models.Plant{}).Delete(&models.Plant{}, request.Plant).Error
-	if errGetPlant != nil {
-		log.Fatalf("Error: Plant with Id: %d could not be deleted. Errormessage: %s", errGetPlant.Error())
-	}*/
-	return &pb.GetAdditionalDataPlantReply{}, nil
+	var plant models.Plant
+	err := s.db.Where(models.Plant{Plant: request.PlantId}).FirstOrInit(&plant).Error
+	if err != nil {
+		log.Fatalf("Error: Plant with Id: %d does not exist yet. Errormessage: %s", request.PlantId, err.Error())
+	}
+
+	var humidityEntries []models.HumidityEntry
+	errHumidity := s.db.Where(models.HumidityEntry{Plant: request.PlantId}).Find(&humidityEntries).Error
+	if errHumidity != nil {
+		log.Fatalf("Error: Plant with Id: %d unable to query Humidity entries. Errormessage: %s", request.PlantId, err.Error())
+	}
+	convertedHumidity := make([]*pb.HumidityMsg, len(humidityEntries))
+	for i, v := range convertedHumidity {
+		convertedHumidity[i] = &pb.HumidityMsg{
+			Humidity:  v.Humidity,
+			Timestamp: v.Timestamp,
+		}
+	}
+
+	return &pb.GetAdditionalDataPlantReply{Plant: request.PlantId, Humidity: convertedHumidity}, nil
 }
 
 func (s *PlantStorage) getRequestedSensorStates(ctx context.Context, request *pb.GetRequestedSensorStatesRequest) (*pb.GetRequestedSensorStatesResponse, error) {
