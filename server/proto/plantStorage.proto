@@ -5,19 +5,44 @@ option go_package = "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto";
 option java_package = "com.example.rpicommunicator_v1";
 
 import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
 
 service PlantStorage {
-  rpc getOverviewAllPlants(GetAllPlantsRequest) returns (AllPlantsReply) {}
-  rpc getAdditionalDataPlant(GetAdditionalDataPlantRequest) returns (GetAdditionalDataPlantReply) {}
+  rpc getOverviewAllPlants(GetAllPlantsRequest) returns (AllPlantsReply) {
+    option (google.api.http) = {
+      get: "/plants"
+    };
+  }
+  rpc getAdditionalDataPlant(GetAdditionalDataPlantRequest) returns (GetAdditionalDataPlantReply) {    option (google.api.http) = {
+    get: "/plant"
+  };
+  }
 
   // Also used to update a plant with the same id if it already exists
-  rpc addNewPlant(AddPlantRequest) returns (PlantOverviewMsg) {}
-  rpc deletePlant(PlantRequest) returns (DeletePlantReply) {}
+  rpc addNewPlant(AddPlantRequest) returns (PlantOverviewMsg) {
+    option (google.api.http) = {
+    put: "/plant/new"
+  };}
+  rpc deletePlant(PlantRequest) returns (DeletePlantReply) {
+    option (google.api.http) = {
+    put: "/plant/delete"
+  };}
 
-  rpc getRequestedSensorStates(GetRequestedSensorStatesRequest) returns (GetRequestedSensorStatesResponse) {}
-  rpc storeHumidityEntry(StoreHumidityRequest) returns (StoreHumidityReply) {}
+  rpc getRequestedSensorStates(GetRequestedSensorStatesRequest) returns (GetRequestedSensorStatesResponse) {
+    option (google.api.http) = {
+    get: "/sensors"
+  };}
+  rpc storeHumidityEntry(StoreHumidityRequest) returns (StoreHumidityReply) {
+    option (google.api.http) = {
+      put: "/humidity/new"
+    };
+  }
 
-  rpc getConnectedDevicesOverview(GetConnectedDevicesRequest) returns (GetConnectedDevicesResponse){}
+  rpc getConnectedDevicesOverview(GetConnectedDevicesRequest) returns (GetConnectedDevicesResponse){
+    option (google.api.http) = {
+      get: "/devices"
+    };
+  }
 }
 
 message GetRequestedSensorStatesRequest{
@@ -85,7 +110,7 @@ message GetAdditionalDataPlantRequest{
 
 message HumidityMsg{
   int32 humidity = 1;
-  float timestamp = 2;
+  google.protobuf.Timestamp timestamp = 2;
 }
 
 message GpioIdentifierMsg{

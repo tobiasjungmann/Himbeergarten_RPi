@@ -1,0 +1,443 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "plantStorage.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "PlantStorage"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/devices": {
+      "get": {
+        "operationId": "PlantStorage_getConnectedDevicesOverview",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/smart_homeGetConnectedDevicesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "PlantStorage"
+        ]
+      }
+    },
+    "/humidity/new": {
+      "put": {
+        "operationId": "PlantStorage_storeHumidityEntry",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/smart_homeStoreHumidityReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "requestNumber",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "humidity",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "PlantStorage"
+        ]
+      }
+    },
+    "/plant": {
+      "get": {
+        "operationId": "PlantStorage_getAdditionalDataPlant",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/smart_homeGetAdditionalDataPlantReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "plantId",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "PlantStorage"
+        ]
+      }
+    },
+    "/plant/delete": {
+      "put": {
+        "operationId": "PlantStorage_deletePlant",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/smart_homeDeletePlantReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "PlantStorage"
+        ]
+      }
+    },
+    "/plant/new": {
+      "put": {
+        "summary": "Also used to update a plant with the same id if it already exists",
+        "operationId": "PlantStorage_addNewPlant",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/smart_homePlantOverviewMsg"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "plantId",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "Name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "Info",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "gpioSensorSlot",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "images",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "byte"
+            },
+            "collectionFormat": "multi"
+          }
+        ],
+        "tags": [
+          "PlantStorage"
+        ]
+      }
+    },
+    "/plants": {
+      "get": {
+        "operationId": "PlantStorage_getOverviewAllPlants",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/smart_homeAllPlantsReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "PlantStorage"
+        ]
+      }
+    },
+    "/sensors": {
+      "get": {
+        "operationId": "PlantStorage_getRequestedSensorStates",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/smart_homeGetRequestedSensorStatesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "PlantStorage"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "smart_homeAllPlantsReply": {
+      "type": "object",
+      "properties": {
+        "plants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/smart_homePlantOverviewMsg"
+          }
+        }
+      }
+    },
+    "smart_homeDeletePlantReply": {
+      "type": "object"
+    },
+    "smart_homeDeviceOverviewMsg": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "type": {
+          "$ref": "#/definitions/smart_homeDeviceTypes"
+        },
+        "interface": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        }
+      }
+    },
+    "smart_homeDeviceTypes": {
+      "type": "string",
+      "enum": [
+        "DEVICE_UNDEFINED",
+        "DEVICE_RPI",
+        "DEVICE_ARDUINO_NANO"
+      ],
+      "default": "DEVICE_UNDEFINED"
+    },
+    "smart_homeGetAdditionalDataPlantReply": {
+      "type": "object",
+      "properties": {
+        "plant": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "gpio": {
+          "$ref": "#/definitions/smart_homeGpioIdentifierMsg"
+        },
+        "Humidity": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/smart_homeHumidityMsg"
+          }
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "byte"
+          }
+        }
+      }
+    },
+    "smart_homeGetConnectedDevicesResponse": {
+      "type": "object",
+      "properties": {
+        "devices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/smart_homeDeviceOverviewMsg"
+          }
+        }
+      }
+    },
+    "smart_homeGetRequestedSensorStatesResponse": {
+      "type": "object",
+      "properties": {
+        "sensors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/smart_homeRequestedSensorMsg"
+          }
+        }
+      }
+    },
+    "smart_homeGpioIdentifierMsg": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "deviceSerialInterfaceName": {
+          "type": "string"
+        },
+        "gpioName": {
+          "type": "string"
+        }
+      }
+    },
+    "smart_homeHumidityMsg": {
+      "type": "object",
+      "properties": {
+        "humidity": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "smart_homePlantOverviewMsg": {
+      "type": "object",
+      "properties": {
+        "plantId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Info": {
+          "type": "string"
+        },
+        "gpio": {
+          "$ref": "#/definitions/smart_homeGpioIdentifierMsg"
+        },
+        "thumbnail": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "smart_homeRequestedSensorMsg": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sensorId": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "smart_homeStoreHumidityReply": {
+      "type": "object"
+    }
+  }
+}
