@@ -25,6 +25,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 
 	createPlant(c, ctx)
+	getPlantOverview(c, ctx)
 	defer cancel()
 }
 
@@ -42,5 +43,22 @@ func createPlant(c pb.PlantStorageClient, ctx context.Context) {
 	} else {
 		log.Info("Create plant request successful.")
 		log.Info(res)
+	}
+}
+
+func getPlantOverview(c pb.PlantStorageClient, ctx context.Context) {
+	res, err := c.GetOverviewAllPlants(ctx, &pb.GetAllPlantsRequest{})
+
+	if err != nil {
+		log.Error(err)
+	} else {
+		log.Info("Create plant request successful.")
+		log.Info(res)
+		log.Info("Plants:")
+		for _, v := range res.Plants {
+			log.Info("Id:   ", v.PlantId)
+			log.Info("Name: ", v.Name)
+			log.Info("Info: ", v.Info)
+		}
 	}
 }

@@ -8,6 +8,8 @@ import (
 	"github.com/tobiasjungmann/Himbeergarten_RPi/server/models"
 	pb "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	//"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -80,8 +82,9 @@ func (s *PlantStorage) StoreHumidityEntry(ctx context.Context, request *pb.Store
 func (s *PlantStorage) AddNewPlant(ctx context.Context, request *pb.AddPlantRequest) (*pb.PlantOverviewMsg, error) {
 	var plant models.Plant
 	result := s.db.Model(&models.Plant{}).
-		First(&plant).
-		Where(models.Plant{Plant: request.PlantId})
+		Where(models.Plant{Plant: request.PlantId}).
+		First(&plant)
+
 	if result.Error != nil {
 		log.WithError(result.Error).Error("Error while querying existing plants.")
 	}
@@ -131,9 +134,9 @@ func (s *PlantStorage) GetOverviewAllPlants(ctx context.Context, request *pb.Get
 
 	convertedPlants := make([]*pb.PlantOverviewMsg, len(plants))
 
-	for i, v := range convertedPlants {
+	for i, v := range plants {
 		convertedPlants[i] = &pb.PlantOverviewMsg{
-			PlantId:   v.PlantId,
+			PlantId:   v.Plant,
 			Name:      v.Name,
 			Info:      v.Info,
 			Gpio:      nil,
@@ -156,10 +159,10 @@ func (s *PlantStorage) GetAdditionalDataPlant(ctx context.Context, request *pb.G
 		log.Fatalf("Error: Plant with Id: %d unable to query Humidity entries. Errormessage: %s", request.PlantId, err.Error())
 	}
 	convertedHumidity := make([]*pb.HumidityMsg, len(humidityEntries))
-	for i, v := range convertedHumidity {
+	for i, v := range humidityEntries {
 		convertedHumidity[i] = &pb.HumidityMsg{
-			Humidity:  v.Humidity,
-			Timestamp: v.Timestamp,
+			Humidity:  v.HumidityEntry,
+			Timestamp: timestamppb.New(v.Timestamp),
 		}
 	}
 
