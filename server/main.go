@@ -9,12 +9,11 @@ import (
 	pb "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
-
+	"time"
 	//"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"net"
-	"time"
 )
 
 var (
@@ -59,26 +58,6 @@ func rpcServer(db *gorm.DB) {
 	}
 }
 
-func (s *PlantStorage) StoreHumidityEntry(ctx context.Context, request *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
-	var plant *models.Plant
-	errGetPlant := s.db.Model(&models.Plant{}).Where("plant = ?", request.RequestNumber).First(&plant).Error
-	if errGetPlant != nil {
-		log.Fatalf("Error: Plant with Id: %d could not be queried. Does it exist? Errormessage: %s", request.RequestNumber, errGetPlant.Error())
-	}
-
-	err := s.db.Model(&models.HumidityEntry{}).Create(&models.HumidityEntry{
-		Plant:     plant.Plant,
-		Value:     request.Humidity,
-		Timestamp: time.Now(),
-	}).Error
-	if err != nil {
-		log.Fatalf("Error: New Humidity Entry for Plant %d with value %d was not created. Errormessage: %s", request.RequestNumber, request.GetHumidity(), err.Error())
-	} else {
-		log.Println("New Humidity Entry for Plant %i with value %i", request.RequestNumber, request.GetHumidity())
-	}
-	return &pb.StoreHumidityReply{}, nil
-}
-
 func (s *PlantStorage) AddNewPlant(ctx context.Context, request *pb.AddPlantRequest) (*pb.PlantOverviewMsg, error) {
 	var plant models.Plant
 	result := s.db.Model(&models.Plant{}).
@@ -88,6 +67,7 @@ func (s *PlantStorage) AddNewPlant(ctx context.Context, request *pb.AddPlantRequ
 	if result.Error != nil {
 		log.WithError(result.Error).Error("Error while querying existing plants.")
 	}
+
 	var errCreatePlant error
 	if result.RowsAffected > 0 {
 		log.Println("Existing plant will be updated")
@@ -108,6 +88,18 @@ func (s *PlantStorage) AddNewPlant(ctx context.Context, request *pb.AddPlantRequ
 	if errCreatePlant != nil {
 		log.Fatalf("Error: Unable to create the new Plant. Errormessage: %s", errCreatePlant.Error())
 	}
+
+	for _, v := range request.Images {
+		resPath := imageWrapper(v.ImageBytes, "plant", v.ImageId)
+		imageEntry := models.ImageEntry{Plant: request.PlantId, Path: resPath}
+		errCreateImage := s.db.Model(&models.ImageEntry{}).Create(&imageEntry).Error
+		if errCreateImage != nil {
+			log.Fatalf("Error: Unable to create the new Image. Errormessage: %s", errCreateImage.Error())
+		} else {
+			log.Println("New image added for plant: ", request.PlantId)
+		}
+	}
+
 	// todo return thumbnail
 	return &pb.PlantOverviewMsg{
 		PlantId:   plant.Plant,
@@ -115,6 +107,26 @@ func (s *PlantStorage) AddNewPlant(ctx context.Context, request *pb.AddPlantRequ
 		Info:      plant.Info,
 		Gpio:      &pb.GpioIdentifierMsg{GpioName: "tba"},
 		Thumbnail: nil}, nil
+}
+
+func (s *PlantStorage) StoreHumidityEntry(ctx context.Context, request *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
+	var plant *models.Plant
+	errGetPlant := s.db.Model(&models.Plant{}).Where("plant = ?", request.RequestNumber).First(&plant).Error
+	if errGetPlant != nil {
+		log.Fatalf("Error: Plant with Id: %d could not be queried. Does it exist? Errormessage: %s", request.RequestNumber, errGetPlant.Error())
+	}
+
+	err := s.db.Model(&models.HumidityEntry{}).Create(&models.HumidityEntry{
+		Plant:     plant.Plant,
+		Value:     request.Humidity,
+		Timestamp: time.Now(),
+	}).Error
+	if err != nil {
+		log.Fatalf("Error: New Humidity Entry for Plant %d with value %d was not created. Errormessage: %s", request.RequestNumber, request.GetHumidity(), err.Error())
+	} else {
+		log.Println("New Humidity Entry for Plant %i with value %i", request.RequestNumber, request.GetHumidity())
+	}
+	return &pb.StoreHumidityReply{}, nil
 }
 
 func (s *PlantStorage) DeletePlant(ctx context.Context, request *pb.PlantRequest) (*pb.DeletePlantReply, error) {
