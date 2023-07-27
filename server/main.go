@@ -37,14 +37,15 @@ func main() {
 		panic("failed to connect database")
 	}
 	// Migrate the schema
-	db.AutoMigrate(&models.Plant{}, &models.HumidityEntry{})
-
+	errMigration := db.AutoMigrate(&models.Plant{}, &models.HumidityEntry{}, &models.ImageEntry{}, &models.Gpio{})
+	if errMigration != nil {
+		log.Fatalf("Unable to perform database migration. Terminating with error: %v", err)
+		return
+	}
 	rpcServer(db)
-
 }
 
 func rpcServer(db *gorm.DB) {
-
 	flag.Parse()
 	localIp := "0.0.0.0" //GetOutboundIP().String()
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", localIp, *port))
@@ -59,7 +60,7 @@ func rpcServer(db *gorm.DB) {
 	}
 }
 
-func (s *PlantStorage) AddNewPlant(ctx context.Context, request *pb.AddPlantRequest) (*pb.PlantOverviewMsg, error) {
+func (s *PlantStorage) AddNewPlant(_ context.Context, request *pb.AddPlantRequest) (*pb.PlantOverviewMsg, error) {
 	var plant models.Plant
 	result := s.db.Model(&models.Plant{}).
 		Where(models.Plant{Plant: request.PlantId}).
@@ -91,7 +92,8 @@ func (s *PlantStorage) AddNewPlant(ctx context.Context, request *pb.AddPlantRequ
 	}
 
 	for _, v := range request.Images {
-		resPath := utils.ImageWrapper(v.ImageBytes, "plant", v.ImageId)
+		path := fmt.Sprintf("%s%d", "plant_", request.PlantId)
+		resPath := utils.StoreImageInNewFile(v.ImageBytes, path, v.ImageId, true)
 		imageEntry := models.ImageEntry{Plant: request.PlantId, Path: resPath}
 		errCreateImage := s.db.Model(&models.ImageEntry{}).Create(&imageEntry).Error
 		if errCreateImage != nil {
@@ -110,15 +112,15 @@ func (s *PlantStorage) AddNewPlant(ctx context.Context, request *pb.AddPlantRequ
 		Thumbnail: nil}, nil
 }
 
-func (s *PlantStorage) DeletePlant(ctx context.Context, request *pb.PlantRequest) (*pb.DeletePlantReply, error) {
+func (s *PlantStorage) DeletePlant(_ context.Context, request *pb.PlantRequest) (*pb.DeletePlantReply, error) {
 	errGetPlant := s.db.Model(&models.Plant{}).Delete(&models.Plant{}, request.Plant).Error
 	if errGetPlant != nil {
-		log.Fatalf("Error: Plant with Id: %d could not be deleted. Errormessage: %s", errGetPlant.Error())
+		log.Fatalf("Error: Plant with Id: %d could not be deleted. Errormessage: %s", request.Plant, errGetPlant.Error())
 	}
 	return &pb.DeletePlantReply{}, nil
 }
 
-func (s *PlantStorage) GetOverviewAllPlants(ctx context.Context, request *pb.GetAllPlantsRequest) (*pb.AllPlantsReply, error) {
+func (s *PlantStorage) GetOverviewAllPlants(_ context.Context, _ *pb.GetAllPlantsRequest) (*pb.AllPlantsReply, error) {
 	var plants []models.Plant
 	result := s.db.Find(&plants)
 	if result.Error != nil {
@@ -139,7 +141,7 @@ func (s *PlantStorage) GetOverviewAllPlants(ctx context.Context, request *pb.Get
 	return &pb.AllPlantsReply{Plants: convertedPlants}, nil
 }
 
-func (s *PlantStorage) GetAdditionalDataPlant(ctx context.Context, request *pb.GetAdditionalDataPlantRequest) (*pb.GetAdditionalDataPlantReply, error) {
+func (s *PlantStorage) GetAdditionalDataPlant(_ context.Context, request *pb.GetAdditionalDataPlantRequest) (*pb.GetAdditionalDataPlantReply, error) {
 	var plant models.Plant
 	err := s.db.Where(models.Plant{Plant: request.PlantId}).FirstOrInit(&plant).Error
 	if err != nil {
@@ -175,7 +177,7 @@ func (s *PlantStorage) GetAdditionalDataPlant(ctx context.Context, request *pb.G
 	return &pb.GetAdditionalDataPlantReply{Plant: request.PlantId, Humidity: convertedHumidity, Images: convertedImages}, nil
 }
 
-func (s *PlantStorage) StoreHumidityEntry(ctx context.Context, request *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
+func (s *PlantStorage) StoreHumidityEntry(_ context.Context, request *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
 	var plant *models.Plant
 	errGetPlant := s.db.Model(&models.Plant{}).Where("plant = ?", request.RequestNumber).First(&plant).Error
 	if errGetPlant != nil {
@@ -195,7 +197,7 @@ func (s *PlantStorage) StoreHumidityEntry(ctx context.Context, request *pb.Store
 	return &pb.StoreHumidityReply{}, nil
 }
 
-func (s *PlantStorage) getRequestedSensorStates(ctx context.Context, request *pb.GetRequestedSensorStatesRequest) (*pb.GetRequestedSensorStatesResponse, error) {
+func (s *PlantStorage) getRequestedSensorStates(_ context.Context, _ *pb.GetRequestedSensorStatesRequest) (*pb.GetRequestedSensorStatesResponse, error) {
 	/*	request.DeviceId
 		var plant models.Plant
 		result := s.db.Model(&models.Device{}).

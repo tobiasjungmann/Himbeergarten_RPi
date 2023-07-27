@@ -13,12 +13,19 @@ import (
 	"os"
 )
 
-func ImageWrapper(image []byte, path string, id int32) string {
+func StoreImageInNewFile(image []byte, path string, id int32, useCompression bool) string {
 	var resPath = ""
 	if len(image) > 0 {
 		var resError error
-		path := fmt.Sprintf("%s%s%s%d%s", "./Storage/rating/", path, "/", id, "/")
-		resPath, resError = StoreImageBytesAtPath(path, image)
+		path := fmt.Sprintf("%s%s", "./Storage/plants/", path)
+		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+			err := os.MkdirAll(path, os.ModePerm)
+			if err != nil {
+				log.WithError(err).Errorf("Directory with path %s could not be created successfully", path)
+				return ""
+			}
+		}
+		resPath, resError = storeImageBytesAtPath(fmt.Sprintf("%s%s%d%s", path, "/", id, "_"), image, useCompression)
 
 		if resError != nil {
 			log.WithError(resError).Error("Error occurred while storing the image.")
@@ -30,27 +37,11 @@ func ImageWrapper(image []byte, path string, id int32) string {
 // StoreImageBytesAtPath
 // stores an image and returns teh path to this image.
 // if needed, a new directory will be created and the path is extended until it is unique
-func StoreImageBytesAtPath(path string, i []byte) (string, error) {
-	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		err := os.MkdirAll(path, os.ModePerm)
-		if err != nil {
-			log.WithError(err).Errorf("Directory with path %s could not be created successfully", path)
-			return "", nil
-		}
-	}
-
+func storeImageBytesAtPath(path string, i []byte, useCompression bool) (string, error) {
 	img, _, _ := image.Decode(bytes.NewReader(i))
-	resizedImage := imaging.Resize(img, 1280, 0, imaging.Lanczos)
-
 	var opts jpeg.Options
-	maxImageSize := 524288 // 0.55MB
-	if len(i) > maxImageSize {
-		opts.Quality = (maxImageSize / len(i)) * 100
-	} else {
-		opts.Quality = 100 // if image small enough use it directly
-	}
 
-	var imgPath = fmt.Sprintf("%s%x.jpeg", path, md5.Sum(i))
+	var imgPath = fmt.Sprintf("%s%x.jpg", path, md5.Sum(i))
 
 	out, errFile := os.Create(imgPath)
 	if errFile != nil {
@@ -64,7 +55,17 @@ func StoreImageBytesAtPath(path string, i []byte) (string, error) {
 		}
 	}(out)
 
-	errFile = jpeg.Encode(out, resizedImage, &opts)
+	if useCompression {
+		img := imaging.Resize(img, 16000, 0, imaging.Lanczos)
+		maxImageSize := 524288 // 0.55MB
+		if len(i) > maxImageSize {
+			opts.Quality = (maxImageSize / len(i)) * 100
+		} else {
+			opts.Quality = 100 // if image small enough use it directly
+		}
+		errFile = jpeg.Encode(out, img, &opts)
+	}
+	errFile = jpeg.Encode(out, img, &opts)
 	return imgPath, errFile
 }
 

@@ -1,17 +1,18 @@
 package main
 
 import (
-	//pb "../server/proto"
 	"context"
 	log "github.com/sirupsen/logrus"
 	pb "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto"
+	"github.com/tobiasjungmann/Himbeergarten_RPi/server/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"time"
 )
 
 const (
-	localAddress = "127.0.0.1:12346"
+	localAddress = "0.0.0.0:12346"
+	testImage    = "./images/IMG_20221218_135005.jpg"
 )
 
 func main() {
@@ -30,12 +31,15 @@ func main() {
 }
 
 func createPlant(c pb.PlantStorageClient, ctx context.Context) {
+
+	images := make([]*pb.ImageMsg, 1)
+	images[0] = &pb.ImageMsg{ImageBytes: utils.LoadImageBytesFromPath(testImage), ImageId: 5}
 	res, err := c.AddNewPlant(ctx, &pb.AddPlantRequest{
 		PlantId:        0,
 		Name:           "Test Pflanze 1",
 		Info:           "Test Info 1",
 		GpioSensorSlot: 0,
-		Images:         nil,
+		Images:         images,
 	})
 
 	if err != nil {
@@ -59,6 +63,9 @@ func getPlantOverview(c pb.PlantStorageClient, ctx context.Context) {
 			log.Info("Id:   ", v.PlantId)
 			log.Info("Name: ", v.Name)
 			log.Info("Info: ", v.Info)
+
+			// todo load photos from thumbnails and store them without compression - flag to the store image
+			//v.Thumbnail
 		}
 	}
 }
