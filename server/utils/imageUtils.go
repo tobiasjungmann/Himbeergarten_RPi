@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"bufio"
@@ -13,7 +13,7 @@ import (
 	"os"
 )
 
-func imageWrapper(image []byte, path string, id int32) string {
+func ImageWrapper(image []byte, path string, id int32) string {
 	var resPath = ""
 	if len(image) > 0 {
 		var resError error
@@ -68,7 +68,7 @@ func StoreImageBytesAtPath(path string, i []byte) (string, error) {
 	return imgPath, errFile
 }
 
-func loadImageBytesFromPath(path string) []byte {
+func LoadImageBytesFromPath(path string) []byte {
 	if len(path) == 0 {
 		return make([]byte, 0)
 	}

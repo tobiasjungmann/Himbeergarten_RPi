@@ -7,6 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/tobiasjungmann/Himbeergarten_RPi/server/models"
 	pb "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto"
+	"github.com/tobiasjungmann/Himbeergarten_RPi/server/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
@@ -90,7 +91,7 @@ func (s *PlantStorage) AddNewPlant(ctx context.Context, request *pb.AddPlantRequ
 	}
 
 	for _, v := range request.Images {
-		resPath := imageWrapper(v.ImageBytes, "plant", v.ImageId)
+		resPath := utils.ImageWrapper(v.ImageBytes, "plant", v.ImageId)
 		imageEntry := models.ImageEntry{Plant: request.PlantId, Path: resPath}
 		errCreateImage := s.db.Model(&models.ImageEntry{}).Create(&imageEntry).Error
 		if errCreateImage != nil {
@@ -107,26 +108,6 @@ func (s *PlantStorage) AddNewPlant(ctx context.Context, request *pb.AddPlantRequ
 		Info:      plant.Info,
 		Gpio:      &pb.GpioIdentifierMsg{GpioName: "tba"},
 		Thumbnail: nil}, nil
-}
-
-func (s *PlantStorage) StoreHumidityEntry(ctx context.Context, request *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
-	var plant *models.Plant
-	errGetPlant := s.db.Model(&models.Plant{}).Where("plant = ?", request.RequestNumber).First(&plant).Error
-	if errGetPlant != nil {
-		log.Fatalf("Error: Plant with Id: %d could not be queried. Does it exist? Errormessage: %s", request.RequestNumber, errGetPlant.Error())
-	}
-
-	err := s.db.Model(&models.HumidityEntry{}).Create(&models.HumidityEntry{
-		Plant:     plant.Plant,
-		Value:     request.Humidity,
-		Timestamp: time.Now(),
-	}).Error
-	if err != nil {
-		log.Fatalf("Error: New Humidity Entry for Plant %d with value %d was not created. Errormessage: %s", request.RequestNumber, request.GetHumidity(), err.Error())
-	} else {
-		log.Println("New Humidity Entry for Plant %i with value %i", request.RequestNumber, request.GetHumidity())
-	}
-	return &pb.StoreHumidityReply{}, nil
 }
 
 func (s *PlantStorage) DeletePlant(ctx context.Context, request *pb.PlantRequest) (*pb.DeletePlantReply, error) {
@@ -178,17 +159,50 @@ func (s *PlantStorage) GetAdditionalDataPlant(ctx context.Context, request *pb.G
 		}
 	}
 
-	return &pb.GetAdditionalDataPlantReply{Plant: request.PlantId, Humidity: convertedHumidity}, nil
+	var imageEntries []models.ImageEntry
+	errImage := s.db.Where(models.ImageEntry{Plant: request.PlantId}).Find(&imageEntries).Error
+	if errImage != nil {
+		log.Fatalf("Error: Plant with Id: %d unable to query Images entries. Errormessage: %s", request.PlantId, err.Error())
+	}
+	convertedImages := make([]*pb.ImageMsg, len(imageEntries))
+	for i, v := range imageEntries {
+		convertedImages[i] = &pb.ImageMsg{
+			ImageId:    v.ImageEntry,
+			ImageBytes: utils.LoadImageBytesFromPath(v.Path),
+		}
+	}
+
+	return &pb.GetAdditionalDataPlantReply{Plant: request.PlantId, Humidity: convertedHumidity, Images: convertedImages}, nil
+}
+
+func (s *PlantStorage) StoreHumidityEntry(ctx context.Context, request *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
+	var plant *models.Plant
+	errGetPlant := s.db.Model(&models.Plant{}).Where("plant = ?", request.RequestNumber).First(&plant).Error
+	if errGetPlant != nil {
+		log.Fatalf("Error: Plant with Id: %d could not be queried. Does it exist? Errormessage: %s", request.RequestNumber, errGetPlant.Error())
+	}
+
+	err := s.db.Model(&models.HumidityEntry{}).Create(&models.HumidityEntry{
+		Plant:     plant.Plant,
+		Value:     request.Humidity,
+		Timestamp: time.Now(),
+	}).Error
+	if err != nil {
+		log.Fatalf("Error: New Humidity Entry for Plant %d with value %d was not created. Errormessage: %s", request.RequestNumber, request.GetHumidity(), err.Error())
+	} else {
+		log.Println("New Humidity Entry for Plant %i with value %i", request.RequestNumber, request.GetHumidity())
+	}
+	return &pb.StoreHumidityReply{}, nil
 }
 
 func (s *PlantStorage) getRequestedSensorStates(ctx context.Context, request *pb.GetRequestedSensorStatesRequest) (*pb.GetRequestedSensorStatesResponse, error) {
-	//request.DeviceId
-	/*var plant models.Plant
-	result := s.db.Model(&models.Plant{}).
-		First(&plant).
-		Where(models.Plant{Plant: request.PlantId})
-	if result.Error != nil {
-		log.WithError(result.Error).Error("Error while querying existing plants.")
-	}*/
+	/*	request.DeviceId
+		var plant models.Plant
+		result := s.db.Model(&models.Device{}).
+			First(&plant).
+			Where(models.Plant{Plant: request.PlantId})
+		if result.Error != nil {
+			log.WithError(result.Error).Error("Error while querying existing plants.")
+		}*/
 	return &pb.GetRequestedSensorStatesResponse{}, nil
 }
