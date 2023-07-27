@@ -93,7 +93,12 @@ message AddPlantRequest {
   string Name = 2;
   string Info = 3;
   int32 gpioSensorSlot = 4;
-  repeated bytes images = 5;
+  repeated ImageMsg images = 5;
+}
+
+message ImageMsg {
+  int32 imageId=1;
+  bytes imageBytes=2;
 }
 
 message PlantOverviewMsg{
@@ -123,7 +128,7 @@ message GetAdditionalDataPlantReply{
   int32 plant = 1;
   GpioIdentifierMsg gpio = 2;
   repeated HumidityMsg Humidity = 4;
-  repeated bytes images = 5;
+  repeated ImageMsg images = 5;
 }
 
 message GetConnectedDevicesRequest{

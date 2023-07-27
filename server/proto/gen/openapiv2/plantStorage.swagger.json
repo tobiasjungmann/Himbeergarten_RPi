@@ -182,17 +182,6 @@
             "required": false,
             "type": "integer",
             "format": "int32"
-          },
-          {
-            "name": "images",
-            "in": "query",
-            "required": false,
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "byte"
-            },
-            "collectionFormat": "multi"
           }
         ],
         "tags": [
@@ -345,8 +334,7 @@
         "images": {
           "type": "array",
           "items": {
-            "type": "string",
-            "format": "byte"
+            "$ref": "#/definitions/smart_homeImageMsg"
           }
         }
       }
@@ -398,6 +386,19 @@
         "timestamp": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "smart_homeImageMsg": {
+      "type": "object",
+      "properties": {
+        "imageId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "imageBytes": {
+          "type": "string",
+          "format": "byte"
         }
       }
     },
