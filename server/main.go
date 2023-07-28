@@ -15,9 +15,9 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"time"
-	//"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
+	"time"
+
 	"gorm.io/gorm"
 	"net"
 )
@@ -38,14 +38,18 @@ const (
 func main() {
 	//s := "user:password@tcp(0.0.0.0:3306)/mydatabase"
 	//	db, err := gorm.Open(mysql.Open(s), &gorm.Config{})
-	//s := ""
+	dockerdb := flag.Bool("db", false, "Use MariaDB in Docker")
+	flag.Parse()
 	s := "test.db"
+	if *dockerdb {
+		s = "user:password@tcp(mariadb:3306)/mydatabase"
+	}
 	db, err := gorm.Open(sqlite.Open(s), &gorm.Config{})
+
 	if err != nil {
 		log.Fatalf("Terminating with error: %v", err)
 		panic("failed to connect database")
 	}
-	// Migrate the schema
 	errMigration := db.AutoMigrate(&models.Plant{}, &models.HumidityEntry{}, &models.ImageEntry{}, &models.Gpio{})
 	if errMigration != nil {
 		log.Fatalf("Unable to perform database migration. Terminating with error: %v", err)
@@ -84,7 +88,7 @@ func rpcServer(db *gorm.DB) {
 	}
 }
 
-func tokenInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+func tokenInterceptor(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "metadata not provided")
