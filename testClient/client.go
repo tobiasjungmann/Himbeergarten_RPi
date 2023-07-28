@@ -3,18 +3,34 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	log "github.com/sirupsen/logrus"
 	pb "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto"
 	"github.com/tobiasjungmann/Himbeergarten_RPi/server/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"time"
 )
 
 const (
 	localAddress = "0.0.0.0:12346"
 	testImage    = "./images/IMG_20221218_135005.jpg"
+	secretToken  = "secert_token"
 )
+
+func generateToken() (string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+
+	tokenString, err := token.SignedString([]byte(secretToken))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}
 
 func main() {
 	log.Info("Connecting...")
@@ -24,11 +40,11 @@ func main() {
 		log.Info(err)
 	}
 	c := pb.NewPlantStorageClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	s, _ := generateToken()
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", s)
 
 	createPlant(c, ctx)
 	getPlantOverview(c, ctx)
-	defer cancel()
 }
 
 func createPlant(c pb.PlantStorageClient, ctx context.Context) {

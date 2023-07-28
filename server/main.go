@@ -4,11 +4,15 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	log "github.com/sirupsen/logrus"
 	"github.com/tobiasjungmann/Himbeergarten_RPi/server/models"
 	pb "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto"
 	"github.com/tobiasjungmann/Himbeergarten_RPi/server/utils"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 	//"gorm.io/driver/mysql"
@@ -25,6 +29,10 @@ type PlantStorage struct {
 	pb.UnimplementedPlantStorageServer
 	db *gorm.DB
 }
+
+const (
+	secretToken = "secert_token"
+)
 
 func main() {
 	//s := "user:password@tcp(0.0.0.0:3306)/mydatabase"
@@ -52,12 +60,34 @@ func rpcServer(db *gorm.DB) {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	s := grpc.NewServer()
+	s := grpc.NewServer(grpc.UnaryInterceptor(tokenInterceptor))
 	pb.RegisterPlantStorageServer(s, &PlantStorage{db: db})
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+}
+
+func tokenInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "metadata not provided")
+	}
+
+	authHeader, ok := md["authorization"]
+	if !ok || len(authHeader) == 0 {
+		return nil, status.Error(codes.Unauthenticated, "authorization token not provided")
+	}
+
+	tokenString := authHeader[0]
+	claims := jwt.MapClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretToken), nil
+	})
+	if err != nil || !token.Valid {
+		return nil, status.Error(codes.Unauthenticated, "invalid token")
+	}
+	return handler(ctx, req)
 }
 
 func (s *PlantStorage) AddNewPlant(_ context.Context, request *pb.AddPlantRequest) (*pb.PlantOverviewMsg, error) {
