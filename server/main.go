@@ -11,6 +11,7 @@ import (
 	"github.com/tobiasjungmann/Himbeergarten_RPi/server/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -54,13 +55,28 @@ func main() {
 }
 
 func rpcServer(db *gorm.DB) {
+	sslFlag := flag.Bool("ssl", false, "Enable SSL/TLS")
 	flag.Parse()
-	localIp := "0.0.0.0" //GetOutboundIP().String()
+	localIp := "0.0.0.0"
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", localIp, *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	s := grpc.NewServer(grpc.UnaryInterceptor(tokenInterceptor))
+
+	var opts []grpc.ServerOption
+	if *sslFlag {
+		creds, err := credentials.NewServerTLSFromFile("cert.pem", "key.pem")
+		if err != nil {
+			log.Fatalf("failed to load TLS certificates: %v", err)
+		}
+		opts = []grpc.ServerOption{grpc.Creds(creds), grpc.UnaryInterceptor(tokenInterceptor)}
+		log.Info("TLS is activated.")
+	} else {
+		opts = []grpc.ServerOption{grpc.UnaryInterceptor(tokenInterceptor)}
+		log.Info("TLS is deactivated.")
+	}
+
+	s := grpc.NewServer(opts...)
 	pb.RegisterPlantStorageServer(s, &PlantStorage{db: db})
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
