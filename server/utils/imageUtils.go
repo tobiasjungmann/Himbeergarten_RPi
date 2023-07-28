@@ -69,26 +69,6 @@ func saveCompressedWithMaxSize(path string, pathSuffix string, img image.Image, 
 		log.WithError(errFile).Error("Error while encoding on the path: ", path)
 		return
 	}
-	err := out.Close()
-	if err != nil {
-		log.WithError(errFile).Error("Error while closing on the path: ", path)
-		return
-	}
-}
-
-func createFile(path string) *os.File {
-	out, errFile := os.Create(path)
-	if errFile != nil {
-		log.WithError(errFile).Error("Error while creating a new file on the path: ", path)
-		return nil
-	}
-	defer func(out *os.File) {
-		err := out.Close()
-		if err != nil {
-			log.WithError(err).Error("Error while closing the file.")
-		}
-	}(out)
-	return out
 }
 
 func LoadImageBytesFromPath(path string) []byte {

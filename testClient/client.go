@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	pb "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto"
 	"github.com/tobiasjungmann/Himbeergarten_RPi/server/utils"
@@ -57,15 +58,13 @@ func getPlantOverview(c pb.PlantStorageClient, ctx context.Context) {
 		log.Error(err)
 	} else {
 		log.Info("Create plant request successful.")
-		log.Info(res)
+		//log.Info(res)
 		log.Info("Plants:")
 		for _, v := range res.Plants {
 			log.Info("Id:   ", v.PlantId)
 			log.Info("Name: ", v.Name)
 			log.Info("Info: ", v.Info)
-
-			// todo load photos from thumbnails and store them without compression - flag to the store image
-			//v.Thumbnail
+			utils.StoreImageInNewFile(v.Thumbnail, fmt.Sprintf("images/test/plant_%d/0_thumbnail.jpg", v.PlantId), 0, false)
 		}
 	}
 }

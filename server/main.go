@@ -92,9 +92,9 @@ func (s *PlantStorage) AddNewPlant(_ context.Context, request *pb.AddPlantReques
 	}
 
 	for _, v := range request.Images {
-		path := fmt.Sprintf("%s%d", "plant_", request.PlantId)
+		path := fmt.Sprintf("%s%d", "plant_", plant.Plant)
 		resPath := utils.StoreImageInNewFile(v.ImageBytes, path, v.ImageId, true)
-		imageEntry := models.ImageEntry{Plant: request.PlantId, Path: resPath}
+		imageEntry := models.ImageEntry{Plant: plant.Plant, Path: resPath}
 		errCreateImage := s.db.Model(&models.ImageEntry{}).Create(&imageEntry).Error
 		if errCreateImage != nil {
 			log.Fatalf("Error: Unable to create the new Image. Errormessage: %s", errCreateImage.Error())
@@ -135,7 +135,7 @@ func (s *PlantStorage) GetOverviewAllPlants(_ context.Context, _ *pb.GetAllPlant
 			Name:      v.Name,
 			Info:      v.Info,
 			Gpio:      nil,
-			Thumbnail: nil,
+			Thumbnail: utils.LoadImageBytesFromPath(fmt.Sprintf("Storage/plants/plant_%d/0_thumbnail.jpg", v.Plant)),
 		}
 	}
 	return &pb.AllPlantsReply{Plants: convertedPlants}, nil
