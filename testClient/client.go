@@ -33,7 +33,7 @@ func main() {
 func createPlant(c pb.PlantStorageClient, ctx context.Context) {
 
 	images := make([]*pb.ImageMsg, 1)
-	images[0] = &pb.ImageMsg{ImageBytes: utils.LoadImageBytesFromPath(testImage), ImageId: 5}
+	images[0] = &pb.ImageMsg{ImageBytes: utils.LoadImageBytesFromPath(testImage), ImageId: 0}
 	res, err := c.AddNewPlant(ctx, &pb.AddPlantRequest{
 		PlantId:        0,
 		Name:           "Test Pflanze 1",

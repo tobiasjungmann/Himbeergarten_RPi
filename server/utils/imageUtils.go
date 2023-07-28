@@ -3,7 +3,6 @@ package utils
 import (
 	"bufio"
 	"bytes"
-	"crypto/md5"
 	"errors"
 	"fmt"
 	"github.com/disintegration/imaging"
@@ -16,37 +15,40 @@ import (
 func StoreImageInNewFile(image []byte, path string, id int32, useCompression bool) string {
 	var resPath = ""
 	if len(image) > 0 {
-		var resError error
-		path := fmt.Sprintf("%s%s", "./Storage/plants/", path)
-		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-			err := os.MkdirAll(path, os.ModePerm)
-			if err != nil {
-				log.WithError(err).Errorf("Directory with path %s could not be created successfully", path)
-				return ""
-			}
-		}
-		resPath, resError = storeImageBytesAtPath(fmt.Sprintf("%s%s%d%s", path, "/", id, "_"), image, useCompression)
-
-		if resError != nil {
-			log.WithError(resError).Error("Error occurred while storing the image.")
-		}
+		path = createPath(path, id)
+		storeImageBytesAtPath(path, image, useCompression, id)
 	}
 	return resPath
+}
+
+func createPath(input string, id int32) string {
+	path := fmt.Sprintf("%s%s", "./Storage/plants/", input)
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		err := os.MkdirAll(path, os.ModePerm)
+		if err != nil {
+			log.WithError(err).Errorf("Directory with path %s could not be created successfully", path)
+			return ""
+		}
+	}
+	return fmt.Sprintf("%s/%d", path, id)
 }
 
 // StoreImageBytesAtPath
 // stores an image and returns teh path to this image.
 // if needed, a new directory will be created and the path is extended until it is unique
-func storeImageBytesAtPath(path string, i []byte, useCompression bool) (string, error) {
+func storeImageBytesAtPath(path string, i []byte, useCompression bool, id int32) {
 	img, _, _ := image.Decode(bytes.NewReader(i))
-	var opts jpeg.Options
+	saveCompressedWithMaxSize(path, ".jpg", img, 1024*1024, len(i), useCompression)
+	if id == 0 {
+		saveCompressedWithMaxSize(path, "_thumbnail.jpg", img, 64*1024, len(i), useCompression)
+	}
+}
 
-	var imgPath = fmt.Sprintf("%s%x.jpg", path, md5.Sum(i))
-
-	out, errFile := os.Create(imgPath)
-	if errFile != nil {
-		log.WithError(errFile).Error("Error while creating a new file on the path: ", path)
-		return imgPath, errFile
+func saveCompressedWithMaxSize(path string, pathSuffix string, img image.Image, maxSize int32, imgSize int, useCompression bool) {
+	out, errCreate := os.Create(fmt.Sprintf("%s%s", path, pathSuffix))
+	if errCreate != nil {
+		log.WithError(errCreate).Error("Error while creating a new file on the path: ", fmt.Sprintf("%s%s", path, pathSuffix))
+		return
 	}
 	defer func(out *os.File) {
 		err := out.Close()
@@ -56,17 +58,37 @@ func storeImageBytesAtPath(path string, i []byte, useCompression bool) (string, 
 	}(out)
 
 	if useCompression {
-		img := imaging.Resize(img, 16000, 0, imaging.Lanczos)
-		maxImageSize := 524288 // 0.55MB
-		if len(i) > maxImageSize {
-			opts.Quality = (maxImageSize / len(i)) * 100
-		} else {
-			opts.Quality = 100 // if image small enough use it directly
-		}
-		errFile = jpeg.Encode(out, img, &opts)
+		scaleFactor := float64(maxSize) / float64(imgSize)
+		newWidth := int(float64(img.Bounds().Dx()) * scaleFactor)
+		newHeight := int(float64(img.Bounds().Dy()) * scaleFactor)
+		img = imaging.Resize(img, newWidth, newHeight, imaging.Lanczos)
 	}
-	errFile = jpeg.Encode(out, img, &opts)
-	return imgPath, errFile
+
+	errFile := jpeg.Encode(out, img, nil)
+	if errFile != nil {
+		log.WithError(errFile).Error("Error while encoding on the path: ", path)
+		return
+	}
+	err := out.Close()
+	if err != nil {
+		log.WithError(errFile).Error("Error while closing on the path: ", path)
+		return
+	}
+}
+
+func createFile(path string) *os.File {
+	out, errFile := os.Create(path)
+	if errFile != nil {
+		log.WithError(errFile).Error("Error while creating a new file on the path: ", path)
+		return nil
+	}
+	defer func(out *os.File) {
+		err := out.Close()
+		if err != nil {
+			log.WithError(err).Error("Error while closing the file.")
+		}
+	}(out)
+	return out
 }
 
 func LoadImageBytesFromPath(path string) []byte {
