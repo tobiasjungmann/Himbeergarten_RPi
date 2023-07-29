@@ -227,7 +227,7 @@
     },
     "/sensors": {
       "get": {
-        "operationId": "PlantStorage_getRequestedSensorStates",
+        "operationId": "PlantStorage_getConnectedSensorOverview",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -242,13 +242,42 @@
             }
           }
         },
+        "tags": [
+          "PlantStorage"
+        ]
+      }
+    },
+    "/sensors/data": {
+      "get": {
+        "operationId": "PlantStorage_GetDataForSensor",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/smart_homeGetDataForSensorReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
         "parameters": [
           {
-            "name": "deviceId",
+            "name": "sensor",
             "in": "query",
             "required": false,
             "type": "integer",
             "format": "int32"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -364,6 +393,17 @@
         }
       }
     },
+    "smart_homeGetDataForSensorReply": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/smart_homeHumidityMsg"
+          }
+        }
+      }
+    },
     "smart_homeGetRequestedSensorStatesResponse": {
       "type": "object",
       "properties": {
@@ -441,11 +481,22 @@
     "smart_homeRequestedSensorMsg": {
       "type": "object",
       "properties": {
-        "requestId": {
+        "deviceId": {
           "type": "integer",
           "format": "int32"
         },
         "sensorId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sensorSlot": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "inUse": {
+          "type": "boolean"
+        },
+        "connectedPlant": {
           "type": "integer",
           "format": "int32"
         }
