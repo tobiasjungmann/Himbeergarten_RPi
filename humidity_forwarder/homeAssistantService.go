@@ -10,6 +10,10 @@ import (
 )
 
 const (
+	testTokenHomeAssistant = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI4MzczNDExNWFlNDc0ZGY4YjJiOGRlNWEzMDZkNTFkMCIsImlhdCI6MTY5MDY0NzM1MSwiZXhwIjoyMDA2MDA3MzUxfQ.RBXcYVaGhas-GPBt-04jE56TX1X50E7ypTJIKR-7zYQ"
+)
+
+const (
 	haAddress = "http://192.168.178.63:8123/api/states/sensor.humidity"
 )
 

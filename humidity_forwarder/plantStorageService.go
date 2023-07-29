@@ -2,12 +2,32 @@ package main
 
 import (
 	"context"
+	"github.com/dgrijalva/jwt-go"
 	log "github.com/sirupsen/logrus"
 	pb "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
+	"time"
 )
+
+const (
+	localAddress            = "0.0.0.0:12346"
+	secretTokenPlantStorage = "secret_token"
+)
+
+func generateToken() (string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+
+	tokenString, err := token.SignedString([]byte(secretTokenPlantStorage))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}
 
 func ForwardToPlantServer(id int32, value int32) {
 	conn, err := grpc.Dial(localAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))

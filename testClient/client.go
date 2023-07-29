@@ -34,7 +34,11 @@ func generateToken() (string, error) {
 
 func main() {
 	log.Info("Connecting...")
+	//testPlantStorage()
+	mockESPHumidity()
+}
 
+func testPlantStorage() {
 	conn, err := grpc.Dial(localAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Info(err)
