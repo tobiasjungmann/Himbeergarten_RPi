@@ -1,6 +1,7 @@
-package humidity_forwarder
+package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
@@ -15,8 +16,9 @@ import (
 )
 
 const (
-	localAddress = "0.0.0.0:12346"
-	secretToken  = "secret_token"
+	localAddress            = "0.0.0.0:12346"
+	secretTokenPlantStorage = "secret_token"
+	testTokenHomeAssistant  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI4MzczNDExNWFlNDc0ZGY4YjJiOGRlNWEzMDZkNTFkMCIsImlhdCI6MTY5MDY0NzM1MSwiZXhwIjoyMDA2MDA3MzUxfQ.RBXcYVaGhas-GPBt-04jE56TX1X50E7ypTJIKR-7zYQ"
 )
 
 func generateToken() (string, error) {
@@ -24,7 +26,7 @@ func generateToken() (string, error) {
 	claims := token.Claims.(jwt.MapClaims)
 	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 
-	tokenString, err := token.SignedString([]byte(secretToken))
+	tokenString, err := token.SignedString([]byte(secretTokenPlantStorage))
 	if err != nil {
 		return "", err
 	}
@@ -33,12 +35,13 @@ func generateToken() (string, error) {
 }
 
 func main() {
-	http.HandleFunc("/receive", receiveHandler)
+	/*http.HandleFunc("/receive", receiveHandler)
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.Fatal("Unable to start Server: ", err)
 		return
-	}
+	}*/
+	forwardToHA(1, 2)
 }
 
 func receiveHandler(w http.ResponseWriter, r *http.Request) {
@@ -94,6 +97,39 @@ func forwardToPlantServer(id int32, value int32) {
 	}
 }
 
-func forwardToHA(id int32, number int32) {
+type HumidityData struct {
+	PlantID  int32 `json:"plant_id"`
+	Humidity int32 `json:"humidity"`
+}
 
+func forwardToHA(id int32, value int32) {
+	url := "http://192.168.178.63:8123/api/states/sensor.humidityTestSensor"
+	client := &http.Client{}
+
+	jsonPayload := `{"state":"32.6", "attributes": {"unit_of_measurement": "%", "friendly_name": "Humidity data Input 1"}}`
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(jsonPayload)))
+	if err != nil {
+		fmt.Println("Error creating HTTP request:", err)
+		return
+	}
+
+	// Set the necessary headers.
+	req.Header.Set("Authorization", "Bearer "+testTokenHomeAssistant)
+	req.Header.Set("Content-Type", "application/json")
+
+	// Send the HTTP request.
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Error sending HTTP request:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Check the response status code for success or failure.
+	if resp.StatusCode == http.StatusOK {
+		fmt.Println("Request successful!")
+	} else {
+		fmt.Println("Request failed with status code:", resp.StatusCode)
+	}
 }

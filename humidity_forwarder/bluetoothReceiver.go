@@ -1,4 +1,4 @@
-package humidity_forwarder
+package main
 
 import (
 	"fmt"
