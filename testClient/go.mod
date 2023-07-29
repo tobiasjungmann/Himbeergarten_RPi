@@ -1,6 +1,6 @@
 module github.com/tobiasjungmann/Himbeergarten_RPi/testClient
 
-go 1.21rc3
+go 1.20.6
 
 replace example.com/tobiasjungmann/Himbeergarten_RPi/server/proto => ../server/proto
 

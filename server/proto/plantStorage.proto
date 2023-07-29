@@ -61,6 +61,8 @@ message RequestedSensorMsg{
 message StoreHumidityRequest{
   int32 requestNumber = 1;
   int32 humidity = 2;
+  int32 deviceId = 3;
+  int32 sensorId = 4;
 }
 
 message GetAllPlantsRequest{
@@ -93,7 +95,8 @@ message AddPlantRequest {
   string Name = 2;
   string Info = 3;
   int32 gpioSensorSlot = 4;
-  repeated ImageMsg images = 5;
+  int32 gpioDeviceId = 5;
+  repeated ImageMsg images = 6;
 }
 
 message ImageMsg {

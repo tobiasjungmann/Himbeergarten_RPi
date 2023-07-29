@@ -69,6 +69,20 @@
             "required": false,
             "type": "integer",
             "format": "int32"
+          },
+          {
+            "name": "deviceId",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "sensorId",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
           }
         ],
         "tags": [
@@ -178,6 +192,13 @@
           },
           {
             "name": "gpioSensorSlot",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "gpioDeviceId",
             "in": "query",
             "required": false,
             "type": "integer",

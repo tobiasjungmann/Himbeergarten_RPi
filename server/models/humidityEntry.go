@@ -4,7 +4,8 @@ import "time"
 
 type HumidityEntry struct {
 	HumidityEntry int32     `gorm:"primary_key;AUTO_INCREMENT;column:humidityEntry;type:int;not null;" json:"humidityEntry" `
-	Plant         int32     `gorm:"foreignKey:Plant;column:plant;type:int;not null;" json:"plant" `
+	DeviceID      int32     `gorm:"column:device;type:int;not null;" json:"device" `
+	SensorSlot    int32     `gorm:"column:sensor;type:int;not null;" json:"sensor" `
 	Value         int32     `gorm:"column:value;type:int;not null;" json:"value" `
 	Timestamp     time.Time `gorm:"column:timestamp;type:timestamp;not null;" json:"timestamp"`
 }

@@ -21,18 +21,21 @@ func (s *PlantStorage) AddNewPlant(_ context.Context, request *pb.AddPlantReques
 		log.WithError(result.Error).Error("Error while querying existing plants.")
 	}
 
+	// todo check that the sensor does actually exist
 	var errCreatePlant error
 	if result.RowsAffected > 0 {
 		log.Println("Existing plant will be updated")
 		plant.Name = request.Name
 		plant.Info = request.Info
-		plant.SensorSlot = request.GpioSensorSlot
+		plant.SensorId = request.GpioSensorSlot
+		plant.DeviceId = request.GpioDeviceId
 		s.db.Save(&plant)
 	} else {
 		plant := models.Plant{
-			Name:       request.Name,
-			Info:       request.Info,
-			SensorSlot: request.GpioSensorSlot,
+			Name:     request.Name,
+			Info:     request.Info,
+			SensorId: request.GpioSensorSlot,
+			DeviceId: request.GpioDeviceId,
 		}
 		errCreatePlant = s.db.Model(&models.Plant{}).Create(&plant).Error
 		log.Println("New plant added")
@@ -104,7 +107,7 @@ func (s *PlantStorage) GetAdditionalDataPlant(_ context.Context, request *pb.Get
 	}
 
 	var humidityEntries []models.HumidityEntry
-	errHumidity := s.db.Where(models.HumidityEntry{Plant: request.PlantId}).Find(&humidityEntries).Error
+	errHumidity := s.db.Where(models.HumidityEntry{SensorSlot: plant.SensorId, DeviceID: plant.DeviceId}).Find(&humidityEntries).Error
 	if errHumidity != nil {
 		log.Fatalf("Error: Plant with Id: %d unable to query Humidity entries. Errormessage: %s", request.PlantId, err.Error())
 	}
