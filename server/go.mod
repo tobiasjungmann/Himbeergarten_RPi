@@ -4,6 +4,7 @@ go 1.21rc3
 
 require (
 	github.com/disintegration/imaging v1.6.2
+	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.1
 	github.com/sirupsen/logrus v1.9.3
 	google.golang.org/genproto/googleapis/api v0.0.0-20230724170836-66ad5b6ff146
@@ -14,7 +15,6 @@ require (
 )
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
