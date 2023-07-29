@@ -16,7 +16,7 @@ import (
 const (
 	localAddress = "0.0.0.0:12346"
 	testImage    = "./images/IMG_20221218_135005.jpg"
-	secretToken  = "secert_token"
+	secretToken  = "secret_token"
 )
 
 func generateToken() (string, error) {
