@@ -94,9 +94,8 @@ message AddPlantRequest {
   int32 plantId = 1;
   string Name = 2;
   string Info = 3;
-  int32 gpioSensorSlot = 4;
-  int32 gpioDeviceId = 5;
-  repeated ImageMsg images = 6;
+  int32 Sensor = 4;
+  repeated ImageMsg images = 5;
 }
 
 message ImageMsg {

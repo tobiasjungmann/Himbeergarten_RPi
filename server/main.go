@@ -44,7 +44,7 @@ func main() {
 		log.Fatalf("Terminating with error: %v", err)
 		panic("failed to connect database")
 	}
-	errMigration := db.AutoMigrate(&models.Plant{}, &models.HumidityEntry{}, &models.ImageEntry{}, &models.Gpio{})
+	errMigration := db.AutoMigrate(&models.Plant{}, &models.HumidityEntry{}, &models.ImageEntry{}, &models.Sensor{})
 	if errMigration != nil {
 		log.Fatalf("Unable to perform database migration. Terminating with error: %v", err)
 		return

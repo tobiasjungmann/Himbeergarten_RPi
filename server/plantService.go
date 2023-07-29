@@ -27,15 +27,13 @@ func (s *PlantStorage) AddNewPlant(_ context.Context, request *pb.AddPlantReques
 		log.Println("Existing plant will be updated")
 		plant.Name = request.Name
 		plant.Info = request.Info
-		plant.SensorId = request.GpioSensorSlot
-		plant.DeviceId = request.GpioDeviceId
+		plant.Sensor = request.Sensor
 		s.db.Save(&plant)
 	} else {
 		plant := models.Plant{
-			Name:     request.Name,
-			Info:     request.Info,
-			SensorId: request.GpioSensorSlot,
-			DeviceId: request.GpioDeviceId,
+			Name:   request.Name,
+			Info:   request.Info,
+			Sensor: request.Sensor,
 		}
 		errCreatePlant = s.db.Model(&models.Plant{}).Create(&plant).Error
 		log.Println("New plant added")
@@ -107,7 +105,7 @@ func (s *PlantStorage) GetAdditionalDataPlant(_ context.Context, request *pb.Get
 	}
 
 	var humidityEntries []models.HumidityEntry
-	errHumidity := s.db.Where(models.HumidityEntry{SensorSlot: plant.SensorId, DeviceID: plant.DeviceId}).Find(&humidityEntries).Error
+	errHumidity := s.db.Where(models.HumidityEntry{Sensor: plant.Sensor}).Find(&humidityEntries).Error
 	if errHumidity != nil {
 		log.Fatalf("Error: Plant with Id: %d unable to query Humidity entries. Errormessage: %s", request.PlantId, err.Error())
 	}

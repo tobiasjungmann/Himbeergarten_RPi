@@ -191,14 +191,7 @@
             "type": "string"
           },
           {
-            "name": "gpioSensorSlot",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "gpioDeviceId",
+            "name": "Sensor",
             "in": "query",
             "required": false,
             "type": "integer",

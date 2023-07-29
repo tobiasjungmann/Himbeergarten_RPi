@@ -8,8 +8,7 @@ type Plant struct {
 	Info     string    `gorm:"column:info;type:mediumtext;not null;" json:"info" `
 	Type     string    `gorm:"column:type;type:mediumtext;not null;" json:"type" `
 	Humidity int32     `gorm:"column:humidity;type:int;not null;" json:"humidity" `
-	SensorId int32     `gorm:"column:sensor;type:int;not null;" json:"sensor"`
-	DeviceId int32     `gorm:"column:device;type:int;not null;" json:"device"`
+	Sensor   int32     `gorm:"foreignKey:Sensor;column:sensor;type:int;not null;" json:"sensor" `
 	Watered  time.Time `gorm:"column:watered;type:timestamp;not null;" json:"watered"`
 }
 
