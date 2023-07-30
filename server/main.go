@@ -19,7 +19,15 @@ import (
 )
 
 var (
-	port = flag.Int("port", 12346, "The server port")
+	port           = flag.Int("port", 12346, "The server port")
+	dbUser         = flag.String("dbUser", "", "Specify the database user (e.g. user)")
+	dbPwd          = flag.String("dbPwd", "", "Specify the database pwd (e.g. password)")
+	dbType         = flag.String("dbType", "", "Specify the database type (e.g. mariadb)")
+	dbPort         = flag.String("dbPort", "", "Specify the database (e.g. 3306)")
+	dbDatabaseName = flag.String("dbdatabase", "", "Specify the database (e.g. mydatabase)")
+
+	sslCertPath = flag.String("sslCert", "", "Specify the path to the file containing the cert.pem file (filename must be included)")
+	sslKeyPath  = flag.String("sslKey", "", "Specify the path to the file containing the key.pem file (filename must be included)")
 )
 
 type PlantStorage struct {
@@ -32,11 +40,11 @@ const (
 )
 
 func main() {
-	dockerdb := flag.Bool("db", false, "Use MariaDB in Docker")
 	flag.Parse()
 	s := "test.db"
-	if *dockerdb {
-		s = "user:password@tcp(mariadb:3306)/mydatabase"
+	if len(*dbUser) > 0 {
+		s = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", *dbUser, *dbPwd, *dbType, *dbPort, *dbDatabaseName) //"user:password@tcp(mariadb:3306)/mydatabase"
+		log.Info("Using database connection String: %s", s)
 	}
 	db, err := gorm.Open(sqlite.Open(s), &gorm.Config{})
 
@@ -53,8 +61,7 @@ func main() {
 }
 
 func rpcServer(db *gorm.DB) {
-	sslFlag := flag.Bool("ssl", false, "Enable SSL/TLS")
-	flag.Parse()
+
 	localIp := "0.0.0.0"
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", localIp, *port))
 	if err != nil {
@@ -62,8 +69,8 @@ func rpcServer(db *gorm.DB) {
 	}
 
 	var opts []grpc.ServerOption
-	if *sslFlag {
-		creds, err := credentials.NewServerTLSFromFile("cert.pem", "key.pem")
+	if len(*sslCertPath) > 0 && len(*sslKeyPath) > 0 {
+		creds, err := credentials.NewServerTLSFromFile(*sslCertPath, *sslKeyPath)
 		if err != nil {
 			log.Fatalf("failed to load TLS certificates: %v", err)
 		}
