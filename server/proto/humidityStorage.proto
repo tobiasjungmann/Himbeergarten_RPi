@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package smart_home;
+option go_package = "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto";
+option java_package = "com.example.rpicommunicator_v1";
+
+service HumidityStorage {
+  rpc storeHumidityEntry(StoreHumidityRequest) returns (StoreHumidityReply); 
+}
+
+message StoreHumidityRequest{
+  int32 requestNumber = 1;
+  int32 humidity = 2;
+  int32 deviceId = 3;
+  int32 sensorId = 4;
+}
+
+message StoreHumidityReply{
+}

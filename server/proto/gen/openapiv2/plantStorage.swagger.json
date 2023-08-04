@@ -38,58 +38,6 @@
         ]
       }
     },
-    "/humidity/new": {
-      "put": {
-        "operationId": "PlantStorage_storeHumidityEntry",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/smart_homeStoreHumidityReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "requestNumber",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "humidity",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "deviceId",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "sensorId",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "PlantStorage"
-        ]
-      }
-    },
     "/plant": {
       "get": {
         "operationId": "PlantStorage_getAdditionalDataPlant",
@@ -501,9 +449,6 @@
           "format": "int32"
         }
       }
-    },
-    "smart_homeStoreHumidityReply": {
-      "type": "object"
     }
   }
 }

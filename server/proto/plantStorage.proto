@@ -32,11 +32,6 @@ service PlantStorage {
     option (google.api.http) = {
     get: "/sensors"
   };}
-  rpc storeHumidityEntry(StoreHumidityRequest) returns (StoreHumidityReply) {
-    option (google.api.http) = {
-      put: "/humidity/new"
-    };
-  }
 
   rpc getConnectedDevicesOverview(GetConnectedDevicesRequest) returns (GetConnectedDevicesResponse){
     option (google.api.http) = {
@@ -66,13 +61,6 @@ message RequestedSensorMsg{
   int32 connectedPlant=5;
 }
 
-message StoreHumidityRequest{
-  int32 requestNumber = 1;
-  int32 humidity = 2;
-  int32 deviceId = 3;
-  int32 sensorId = 4;
-}
-
 message GetAllPlantsRequest{
 }
 
@@ -89,9 +77,6 @@ message  PlantRequest{
 }
 
 message DeletePlantReply{
-}
-
-message StoreHumidityReply{
 }
 
 message AllPlantsReply{
