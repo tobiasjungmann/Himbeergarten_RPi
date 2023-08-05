@@ -9,10 +9,10 @@ service HumidityStorage {
 }
 
 message StoreHumidityRequest{
-  required int32 requestNumber = 1;
-  required int32 humidity = 2;
-  required int32 deviceId = 3;
-  required int32 sensorId = 4;
+  required string deviceId = 1;
+  required int32 sensorId = 2;
+  required int32 humidity = 3;
+  required int32 humidityInPercent = 4;
 }
 
 message StoreHumidityReply{
