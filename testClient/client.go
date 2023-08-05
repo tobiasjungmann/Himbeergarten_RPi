@@ -40,7 +40,7 @@ func main() {
 }
 
 func testHumidityForwarder() {
-	conn, err := grpc.Dial("[::]:12348", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial("192.168.0.6:12348", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Info(err)
 	}

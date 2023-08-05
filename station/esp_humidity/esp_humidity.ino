@@ -9,23 +9,22 @@
 #include "humidityStorage.pb.h"
 
 
-WiFiClient client;
+
 
 const char* ssid     = "aaaa";         // The SSID (name) of the Wi-Fi network you want to connect to
 const char* password = "asdasdasd";     // The password of the Wi-Fi network
-const char* addr     = "192.168.0.4";
+const char* addr     = "192.168.0.6";
 const uint16_t port  = 12348;
 
-// GRPC stuff
-uint8_t buffer[128];
+WiFiClient client;
 
-smart_home_StoreHumidityRequest message=smart_home_StoreHumidityRequest_init_zero;
+
 
 void setup() {
   Serial.begin(115200);         // Start the Serial communication to send messages to the computer
   delay(10);
   Serial.println('\n');
-  
+   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);             // Connect to the network
   Serial.print("Connecting to ");
   Serial.print(ssid); Serial.println(" ...");
@@ -45,10 +44,19 @@ void setup() {
 }
 
 void loop() {
-    delay(5000);
+    if (!client.connect(addr, port)) {
+    Serial.println("connection failed");
+    Serial.println("wait 5 sec to reconnect...");
+    delay(2000);
+    return;
+  }
+    delay(2000);
+    smart_home_StoreHumidityRequest message=smart_home_StoreHumidityRequest_init_zero;
 message.humidity=42;
 message.sensorId=0;
 message.sensorId=123;
+// GRPC stuff
+uint8_t buffer[128];
   pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
 
    bool status = pb_encode(&stream, smart_home_StoreHumidityRequest_fields, &message);
@@ -59,7 +67,7 @@ if (!status)
     return;
 }
 	
-Serial.println("Amount of Bytes %i",stream.bytes_written);
+Serial.printf("Amount of Bytes %d\n",stream.bytes_written);
 for(int i = 0; i<stream.bytes_written; i++){
   Serial.printf("%02X",buffer[i]);
 }

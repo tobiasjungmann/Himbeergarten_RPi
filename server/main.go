@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"gorm.io/driäver/sqlite"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"net"
 )

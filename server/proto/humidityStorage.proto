@@ -1,4 +1,4 @@
-syntax = "proto3";
+syntax = "proto2";
 
 package smart_home;
 option go_package = "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto";
@@ -9,10 +9,10 @@ service HumidityStorage {
 }
 
 message StoreHumidityRequest{
-  int32 requestNumber = 1;
-  int32 humidity = 2;
-  int32 deviceId = 3;
-  int32 sensorId = 4;
+  required int32 requestNumber = 1;
+  required int32 humidity = 2;
+  required int32 deviceId = 3;
+  required int32 sensorId = 4;
 }
 
 message StoreHumidityReply{
