@@ -29,7 +29,7 @@ func generateToken() (string, error) {
 	return tokenString, nil
 }
 
-func ForwardToPlantServer(id int32, value int32) {
+func ForwardToPlantServer(id string, value int32) {
 	address := fmt.Sprintf("%s:%d", *ipStorage, portStorage)
 	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	log.Info("Forwarder connecting to ", address)
@@ -40,7 +40,7 @@ func ForwardToPlantServer(id int32, value int32) {
 	s, _ := generateToken()
 	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", s)
 
-	_, errStore := c.StoreHumidityEntry(ctx, &pb.StoreHumidityRequest{RequestNumber: id, Humidity: value})
+	_, errStore := c.StoreHumidityEntry(ctx, &pb.StoreHumidityRequest{DeviceId: &id, Humidity: &value})
 
 	if errStore != nil {
 		log.Error(errStore.Error())

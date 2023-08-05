@@ -27,7 +27,7 @@ type Attributes struct {
 	FriendlyName      string `json:"friendly_name"`
 }
 
-func ForwardToHA(id int32, value int32) {
+func ForwardToHA(id string, value int32) {
 	url := fmt.Sprintf("%s%d", haAddress, id)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(generatePayload(value))))
 

@@ -2,12 +2,16 @@ package main
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"time"
 
 	"github.com/paypal/gatt"
 	"github.com/paypal/gatt/examples/option"
 )
 
+func handleBluetooth() {
+	log.Fatalf("Bluetooth forwarding not yet implemented")
+}
 func onStateChanged(d gatt.Device, s gatt.State) {
 	fmt.Printf("State: %s\n", s)
 	switch s {
