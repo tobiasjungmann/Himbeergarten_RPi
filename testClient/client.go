@@ -35,7 +35,30 @@ func generateToken() (string, error) {
 func main() {
 	log.Info("Connecting...")
 	//testPlantStorage()
-	mockESPHumidity()
+	testHumidityForwarder()
+	//mockESPHumidity()
+}
+
+func testHumidityForwarder() {
+	conn, err := grpc.Dial("[::]:12348", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Info(err)
+	}
+	c := pb.NewHumidityStorageClient(conn)
+	ctx := metadata.AppendToOutgoingContext(context.Background())
+
+	res, err := c.StoreHumidityEntry(ctx, &pb.StoreHumidityRequest{
+		Humidity: 42,
+		SensorId: 12,
+	})
+
+	if err != nil {
+		log.Error(err)
+	} else {
+		log.Info("Request send successfully request successful.")
+		log.Info(res)
+	}
+
 }
 
 func testPlantStorage() {
@@ -52,15 +75,13 @@ func testPlantStorage() {
 }
 
 func createPlant(c pb.PlantStorageClient, ctx context.Context) {
-
 	images := make([]*pb.ImageMsg, 1)
 	images[0] = &pb.ImageMsg{ImageBytes: utils.LoadImageBytesFromPath(testImage), ImageId: 0}
 	res, err := c.AddNewPlant(ctx, &pb.AddPlantRequest{
-		PlantId:        0,
-		Name:           "Test Pflanze 1",
-		Info:           "Test Info 1",
-		GpioSensorSlot: 0,
-		Images:         images,
+		PlantId: 0,
+		Name:    "Test Pflanze 1",
+		Info:    "Test Info 1",
+		Images:  images,
 	})
 
 	if err != nil {
