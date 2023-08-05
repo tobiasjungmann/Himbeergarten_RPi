@@ -22,6 +22,9 @@ void setup() {
   Serial.println('\n');
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
+  Serial.println("going to sleep");
+
+  Serial.println("Sleeping finished");
 }
 
 // Source: https://how2electronics.com/interface-capacitive-soil-moisture-sensor-arduino/
@@ -35,16 +38,16 @@ void getMoistureValues() {
   Serial.println(soilMoistureValue);
   int soilmoisturepercent = map(soilMoistureValue, AirValue, WaterValue, 0, 100);
   if (soilmoisturepercent > 100) {
-    soilmoisturepercent=100;
+    soilmoisturepercent = 100;
   } else if (soilmoisturepercent < 0) {
-    soilmoisturepercent=0;
-  } 
-  message.humidityInPercent=soilmoisturepercent;
-  message.humidity=soilMoistureValue;
+    soilmoisturepercent = 0;
+  }
+  message.humidityInPercent = soilmoisturepercent;
+  message.humidity = soilMoistureValue;
 }
 
 bool waitForConnection() {
-   Serial.print("Connecting to ");
+  Serial.print("Connecting to ");
   Serial.print(ssid);
   int i = 0;
   while (WiFi.status() != WL_CONNECTED) {  // Wait for the Wi-Fi to connect
@@ -58,34 +61,36 @@ bool waitForConnection() {
   Serial.print("IP address:\t");
   Serial.println(WiFi.localIP());
   Serial.println(WiFi.macAddress());
-
-  if (!client.connect(addr, port)) {
-    Serial.println("connection failed");
-    Serial.println("wait 5 sec to reconnect...");
-
-    return false;
+  
+  for (i = 0; i < 15; i++) {
+    if (!client.connect(addr, port)) {
+      Serial.println("connection failed");
+      Serial.println("wait 5 sec to reconnect...");
+    }else{
+      return true
+    }
   }
-  return true
+  return false;
 }
 
-void sendToForwarder(){
-    uint8_t buffer[128];
-    pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
+void sendToForwarder() {
+  uint8_t buffer[128];
+  pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
 
-    bool status = pb_encode(&stream, smart_home_StoreHumidityRequest_fields, &message);
+  bool status = pb_encode(&stream, smart_home_StoreHumidityRequest_fields, &message);
 
-    if (!status) {
-      Serial.println("Failed to encode");
-      return;
-    }
+  if (!status) {
+    Serial.println("Failed to encode");
+    return;
+  }
 
-    Serial.printf("Amount of Bytes %d\n", stream.bytes_written);
-    for (int i = 0; i < stream.bytes_written; i++) {
-      Serial.printf("%02X", buffer[i]);
-    }
+  Serial.printf("Amount of Bytes %d\n", stream.bytes_written);
+  for (int i = 0; i < stream.bytes_written; i++) {
+    Serial.printf("%02X", buffer[i]);
+  }
 
-    client.write(buffer, stream.bytes_written);
-    Serial.println("");
+  client.write(buffer, stream.bytes_written);
+  Serial.println("");
 }
 
 
@@ -96,5 +101,7 @@ void loop() {
     message.sensorId = 0;
     sendToForwarder();
   }
-  delay(2000);
+  ESP.deepSleep(20e6);  // 20e6 is 20 microseconds
+  yield();
+  //  delay(2000);
 }
