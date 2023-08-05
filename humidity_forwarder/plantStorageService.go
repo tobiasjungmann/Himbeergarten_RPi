@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	log "github.com/sirupsen/logrus"
 	pb "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto"
@@ -12,7 +13,6 @@ import (
 )
 
 const (
-	localAddress            = "0.0.0.0:12347"
 	secretTokenPlantStorage = "secret_token"
 )
 
@@ -30,7 +30,9 @@ func generateToken() (string, error) {
 }
 
 func ForwardToPlantServer(id int32, value int32) {
-	conn, err := grpc.Dial(localAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	address := fmt.Sprintf("%s:%d", *ipStorage, portStorage)
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	log.Info("Forwarder connecting to ", address)
 	if err != nil {
 		log.Error(err)
 	}

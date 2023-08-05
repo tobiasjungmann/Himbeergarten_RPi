@@ -16,6 +16,8 @@ import (
 
 var (
 	port        = flag.Int("port", 12348, "The forwarder port")
+	portStorage = flag.Int("portStorage", 12347, "The forwarder port")
+	ipStorage   = flag.String("ipStorage", "0.0.0.0", "The forwarder port")
 	sslCertPath = flag.String("sslCert", "", "Specify the path to the file containing the cert.pem file (filename must be included)")
 	sslKeyPath  = flag.String("sslKey", "", "Specify the path to the file containing the key.pem file (filename must be included)")
 )
