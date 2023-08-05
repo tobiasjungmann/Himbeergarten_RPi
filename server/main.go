@@ -61,7 +61,7 @@ func main() {
 }
 
 func rpcServer(db *gorm.DB) {
-
+	go startSensorAPI(db)
 	localIp := "0.0.0.0"
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", localIp, *port))
 	if err != nil {
@@ -83,7 +83,7 @@ func rpcServer(db *gorm.DB) {
 
 	s := grpc.NewServer(opts...)
 	pb.RegisterPlantStorageServer(s, &PlantStorage{db: db})
-	log.Printf("server listening at %v", lis.Addr())
+	log.Info("Plant Server listening at ", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

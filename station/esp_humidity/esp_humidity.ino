@@ -14,7 +14,7 @@ WiFiClient client;
 const char* ssid     = "aaaa";         // The SSID (name) of the Wi-Fi network you want to connect to
 const char* password = "asdasdasd";     // The password of the Wi-Fi network
 const char* addr     = "192.168.0.4";
-const uint16_t port  = 12346;
+const uint16_t port  = 12348;
 
 // GRPC stuff
 uint8_t buffer[128];
@@ -59,9 +59,10 @@ if (!status)
     return;
 }
 	
-Serial.println(stream.bytes_written);
+Serial.println("Amount of Bytes %i",stream.bytes_written);
 for(int i = 0; i<stream.bytes_written; i++){
   Serial.printf("%02X",buffer[i]);
 }
   client.write(buffer, stream.bytes_written);
+  Serial.println("");
  }

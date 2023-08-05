@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	localAddress            = "0.0.0.0:12346"
+	localAddress            = "0.0.0.0:12347"
 	secretTokenPlantStorage = "secret_token"
 )
 
@@ -34,7 +34,7 @@ func ForwardToPlantServer(id int32, value int32) {
 	if err != nil {
 		log.Error(err)
 	}
-	c := pb.NewPlantStorageClient(conn)
+	c := pb.NewHumidityStorageClient(conn)
 	s, _ := generateToken()
 	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", s)
 
