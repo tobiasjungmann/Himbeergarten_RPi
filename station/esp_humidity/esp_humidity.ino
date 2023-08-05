@@ -1,19 +1,18 @@
 #include <ESP8266WiFi.h>
 
+#include "humidityStorage.pb.h"
 
 #include "pb_common.h"
 #include "pb.h"
 #include "pb_encode.h"
 #include "pb_decode.h"
 
-#include "humidityStorage.pb.h"
-
 
 
 
 const char* ssid     = "aaaa";         // The SSID (name) of the Wi-Fi network you want to connect to
 const char* password = "asdasdasd";     // The password of the Wi-Fi network
-const char* addr     = "192.168.0.6";
+const char* addr     = "192.168.0.4";
 const uint16_t port  = 12348;
 
 WiFiClient client;
@@ -52,11 +51,12 @@ void loop() {
   }
     delay(2000);
     smart_home_StoreHumidityRequest message=smart_home_StoreHumidityRequest_init_zero;
-message.humidity=42;
-message.sensorId=0;
-message.sensorId=123;
-// GRPC stuff
-uint8_t buffer[128];
+    message.humidity=42;
+    message.sensorId=0;
+    message.sensorId=123;
+
+  // GRPC stuff
+  uint8_t buffer[128];
   pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
 
    bool status = pb_encode(&stream, smart_home_StoreHumidityRequest_fields, &message);
@@ -67,10 +67,11 @@ if (!status)
     return;
 }
 	
-Serial.printf("Amount of Bytes %d\n",stream.bytes_written);
-for(int i = 0; i<stream.bytes_written; i++){
-  Serial.printf("%02X",buffer[i]);
-}
+  Serial.printf("Amount of Bytes %d\n",stream.bytes_written);
+  for(int i = 0; i<stream.bytes_written; i++){
+    Serial.printf("%02X",buffer[i]);
+  }
+
   client.write(buffer, stream.bytes_written);
   Serial.println("");
  }
