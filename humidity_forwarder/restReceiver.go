@@ -8,8 +8,8 @@ import (
 )
 
 type Message struct {
-	ID    int32 `json:"deviceid"`
-	Value int32 `json:"value"`
+	ID    string `json:"deviceid"`
+	Value int32  `json:"value"`
 }
 
 func handleHTTP() {

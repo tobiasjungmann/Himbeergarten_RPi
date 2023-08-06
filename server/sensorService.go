@@ -49,14 +49,14 @@ func startSensorAPI(db *gorm.DB) {
 func (s server) StoreHumidityEntry(_ context.Context, request *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
 	var sensor models.Sensor
 	result := s.db.Model(&models.Sensor{}).
-		Where(models.Sensor{SensorSlot: *request.SensorId, DeviceId: *request.DeviceId}).
+		Where(models.Sensor{SensorSlot: *request.SensorId, DeviceMAC: *request.DeviceId}).
 		First(&sensor).Error
 	sensorId := sensor.Sensor
 	if result != nil {
 		log.WithError(result).Error("Creating new Sensor.")
 		sensor := models.Sensor{
 			SensorSlot: *request.SensorId,
-			DeviceId:   *request.DeviceId,
+			DeviceMAC:  *request.DeviceId,
 			InUse:      false,
 		}
 		errCreateSensor := s.db.Model(&models.Sensor{}).Create(&sensor).Error

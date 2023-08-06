@@ -27,13 +27,13 @@ func (s *PlantStorage) AddNewPlant(_ context.Context, request *pb.AddPlantReques
 		log.Println("Existing plant will be updated")
 		plant.Name = request.Name
 		plant.Info = request.Info
-		plant.Sensor = request.Sensor
+		plant.Sensor = request.SensorId
 		s.db.Save(&plant)
 	} else {
 		plant := models.Plant{
 			Name:   request.Name,
 			Info:   request.Info,
-			Sensor: request.Sensor,
+			Sensor: request.SensorId,
 		}
 		errCreatePlant = s.db.Model(&models.Plant{}).Create(&plant).Error
 		log.Println("New plant added")

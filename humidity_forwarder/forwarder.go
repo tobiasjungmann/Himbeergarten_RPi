@@ -25,7 +25,7 @@ type server struct {
 
 func main() {
 	if !*restReceiver && !*bluetoothReceiver && !*protoReceiver && !*grpcReceiver {
-		log.Fatalf("no API format selected. set at least one.")
+		log.Fatalf("no API format selected. Set at least one.")
 		return
 	}
 	if *restReceiver {

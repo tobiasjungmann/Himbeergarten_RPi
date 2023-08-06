@@ -6,7 +6,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/paypal/gatt v0.0.0-20151011220935-4ae819d591cf
 	github.com/sirupsen/logrus v1.9.3
-	github.com/tobiasjungmann/Himbeergarten_RPi/server v0.0.0-20230805171237-8461b7a07477
+	github.com/tobiasjungmann/Himbeergarten_RPi/server v0.0.0-20230806151313-d8e2f2003e1f
 	google.golang.org/grpc v1.57.0
 	google.golang.org/protobuf v1.31.0
 )

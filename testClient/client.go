@@ -46,10 +46,15 @@ func testHumidityForwarder() {
 	}
 	c := pb.NewHumidityStorageClient(conn)
 	ctx := metadata.AppendToOutgoingContext(context.Background())
-
+	var humidity int32 = 698
+	var humidityInPercent int32 = 42
+	var sensorId int32 = 0
+	var deviceMAC = "te:st:MAC:00:00:00"
 	res, err := c.StoreHumidityEntry(ctx, &pb.StoreHumidityRequest{
-		Humidity: 42,
-		SensorId: 12,
+		Humidity:          &humidity,
+		SensorId:          &sensorId,
+		HumidityInPercent: &humidityInPercent,
+		DeviceId:          &deviceMAC,
 	})
 
 	if err != nil {
