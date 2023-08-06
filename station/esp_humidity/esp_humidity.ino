@@ -1,6 +1,6 @@
 #include <ESP8266WiFi.h>
 
-#include "humidityStorage.pb.h"
+#include "src/humidityStorage.pb.h"
 
 #include "pb_common.h"
 #include "pb.h"
@@ -67,7 +67,7 @@ bool waitForConnection() {
       Serial.println("connection failed");
       Serial.println("wait 5 sec to reconnect...");
     }else{
-      return true
+      return true;
     }
   }
   return false;
@@ -97,11 +97,11 @@ void sendToForwarder() {
 void loop() {
   if (waitForConnection()) {
     getMoistureValues();
-    //strcpy(message.deviceId, WiFi.macAddress());
+    strcpy(message.deviceId, WiFi.macAddress().c_str());
     message.sensorId = 0;
     sendToForwarder();
   }
-  ESP.deepSleep(20e6);  // 20e6 is 20 microseconds
-  yield();
-  //  delay(2000);
+ // ESP.deepSleep(20e6);  // 20e6 is 20 microseconds
+ // yield();
+    delay(2000);
 }
