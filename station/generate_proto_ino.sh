@@ -1,28 +1,26 @@
 #!/bin/sh
 
-# todo adapt file
-# todo check if library is added correctly
-
-rm -rf ./esp_humidity/proto-ino
-mkdir -p ./esp_humidity/proto-ino
-
-ln ../server/proto/humidityStorage.options ./humidityStorage.options
-
 GENERATOR_PATH=/home/tobias/Downloads/nanopb-0.4.7-linux-x86/generator/protoc-gen-nanopb
 PROTO_PATH=../server/proto/
-PROTO_OUT_PATH=./esp_humidity/
+PROTO_OUT_PATH=./esp_humidity/src/
+PROTO_NAME=humidityStorage
 
+rm -rf $PROTO_OUT_PATH
+mkdir -p $PROTO_OUT_PATH
 
-#protoc --proto_path=$PROTO_PATH \
-#--plugin=protoc-gen-nanopb=$GENERATOR_PATH \
-#      --nanopb_out=-v:. \
-#      humidityStorage.proto
+ln ../server/proto/$PROTO_NAME.options ./$PROTO_NAME.options
 
-# to generate c++ --cpp_out=./
 protoc --plugin=protoc-gen-nanopb=$GENERATOR_PATH \
       --experimental_allow_proto3_optional=false \
       --proto_path=$PROTO_PATH \
       --nanopb_out=-v:$PROTO_OUT_PATH  \
-      humidityStorage.proto
+      $PROTO_NAME.proto
 
-rm ./humidityStorage.options
+rm ./$PROTO_NAME.options
+
+
+if [ ! -f "$HOME/Arduino/libraries/Nanopb/pb.h" ]; then
+  RED='\033[0;31m'
+  NC='\033[0m'
+  echo "${RED}Library nanoPB is not yet added to the default library folder in the Arduino environment${NC}"
+fi
