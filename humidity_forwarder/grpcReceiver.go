@@ -38,7 +38,7 @@ func handleGRPC() {
 	}
 }
 
-func (s server) StoreHumidityEntry(ctx context.Context, request *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
+func (s server) StoreHumidityEntry(_ context.Context, request *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
 	forwardData(*request.DeviceId, *request.Humidity)
 	return &pb.StoreHumidityReply{}, nil
 }

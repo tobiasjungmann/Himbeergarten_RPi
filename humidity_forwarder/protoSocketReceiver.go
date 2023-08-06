@@ -16,13 +16,21 @@ func handleProtoBasedSocket() {
 		log.Println(err)
 		os.Exit(1)
 	}
-	defer ln.Close()
+	defer func(ln net.Listener) {
+		err := ln.Close()
+		if err != nil {
+			log.Info("Error while closing the socket: ", err.Error())
+		}
+	}(ln)
 
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
 			log.Println(err)
-			conn.Close()
+			err := conn.Close()
+			if err != nil {
+				log.Info("Error while closing the connection: ", err.Error())
+			}
 			continue
 		}
 		log.Println("Connected to ", conn.RemoteAddr())
@@ -56,7 +64,7 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 
-	fmt.Printf("{DeviceID:%d, Humidity:%d}\n",
+	fmt.Printf("{DeviceID:%s, Humidity:%d}\n",
 		e.GetDeviceId(),
 		e.GetHumidity(),
 	)
