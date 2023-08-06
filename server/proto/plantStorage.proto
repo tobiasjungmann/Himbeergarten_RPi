@@ -28,7 +28,7 @@ service PlantStorage {
     put: "/plant/delete"
   };}
 
-  rpc getConnectedSensorOverview(GetRequestedSensorStatesRequest) returns (GetRequestedSensorStatesResponse) {
+  rpc getConnectedSensorOverview(GetSensorOverviewRequest) returns (GetSensorOverviewResponse) {
     option (google.api.http) = {
     get: "/sensors"
   };}
@@ -46,15 +46,15 @@ service PlantStorage {
 
 }
 
-message GetRequestedSensorStatesRequest{
+message GetSensorOverviewRequest{
 }
 
-message GetRequestedSensorStatesResponse{
-  repeated RequestedSensorMsg sensors = 1;
+message GetSensorOverviewResponse{
+  repeated SensorMsg sensors = 1;
 }
 
-message RequestedSensorMsg{
-  int32 deviceId = 1;
+message SensorMsg{
+  string deviceMAC = 1;
   int32 sensorId = 2;
   int32 sensorSlot =3;
   bool inUse = 4;
@@ -87,7 +87,7 @@ message AddPlantRequest {
   int32 plantId = 1;
   string Name = 2;
   string Info = 3;
-  int32 Sensor = 4;
+  int32 sensorId = 4;
   repeated ImageMsg images = 5;
 }
 
@@ -114,7 +114,7 @@ message HumidityMsg{
 }
 
 message GpioIdentifierMsg{
-  int32 deviceId = 1;
+  int32 sensorId = 1;
   string deviceSerialInterfaceName = 2;
   string gpioName = 3;
 }
@@ -122,12 +122,12 @@ message GpioIdentifierMsg{
 message GetAdditionalDataPlantReply{
   int32 plant = 1;
   GpioIdentifierMsg gpio = 2;
-  repeated HumidityMsg Humidity = 4;
+  repeated HumidityMsg humidity = 4;
   repeated ImageMsg images = 5;
 }
 
 message GetDataForSensorRequest{
-  int32 sensor = 1;
+  int32 sensorId = 1;
   optional int64 limit = 2;
 }
 
@@ -144,7 +144,8 @@ message GetConnectedDevicesResponse{
 }
 
 message DeviceOverviewMsg{
-  int32 deviceId = 1;
+  int32 SensorId = 1;
+  string deviceMAC = 6;
   DeviceTypes type = 2;
   string interface = 3;
   string name = 4;

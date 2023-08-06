@@ -27,7 +27,7 @@ type PlantStorageClient interface {
 	// Also used to update a plant with the same id if it already exists
 	AddNewPlant(ctx context.Context, in *AddPlantRequest, opts ...grpc.CallOption) (*PlantOverviewMsg, error)
 	DeletePlant(ctx context.Context, in *PlantRequest, opts ...grpc.CallOption) (*DeletePlantReply, error)
-	GetConnectedSensorOverview(ctx context.Context, in *GetRequestedSensorStatesRequest, opts ...grpc.CallOption) (*GetRequestedSensorStatesResponse, error)
+	GetConnectedSensorOverview(ctx context.Context, in *GetSensorOverviewRequest, opts ...grpc.CallOption) (*GetSensorOverviewResponse, error)
 	GetConnectedDevicesOverview(ctx context.Context, in *GetConnectedDevicesRequest, opts ...grpc.CallOption) (*GetConnectedDevicesResponse, error)
 	GetDataForSensor(ctx context.Context, in *GetDataForSensorRequest, opts ...grpc.CallOption) (*GetDataForSensorReply, error)
 }
@@ -76,8 +76,8 @@ func (c *plantStorageClient) DeletePlant(ctx context.Context, in *PlantRequest, 
 	return out, nil
 }
 
-func (c *plantStorageClient) GetConnectedSensorOverview(ctx context.Context, in *GetRequestedSensorStatesRequest, opts ...grpc.CallOption) (*GetRequestedSensorStatesResponse, error) {
-	out := new(GetRequestedSensorStatesResponse)
+func (c *plantStorageClient) GetConnectedSensorOverview(ctx context.Context, in *GetSensorOverviewRequest, opts ...grpc.CallOption) (*GetSensorOverviewResponse, error) {
+	out := new(GetSensorOverviewResponse)
 	err := c.cc.Invoke(ctx, "/smart_home.PlantStorage/getConnectedSensorOverview", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -112,7 +112,7 @@ type PlantStorageServer interface {
 	// Also used to update a plant with the same id if it already exists
 	AddNewPlant(context.Context, *AddPlantRequest) (*PlantOverviewMsg, error)
 	DeletePlant(context.Context, *PlantRequest) (*DeletePlantReply, error)
-	GetConnectedSensorOverview(context.Context, *GetRequestedSensorStatesRequest) (*GetRequestedSensorStatesResponse, error)
+	GetConnectedSensorOverview(context.Context, *GetSensorOverviewRequest) (*GetSensorOverviewResponse, error)
 	GetConnectedDevicesOverview(context.Context, *GetConnectedDevicesRequest) (*GetConnectedDevicesResponse, error)
 	GetDataForSensor(context.Context, *GetDataForSensorRequest) (*GetDataForSensorReply, error)
 	mustEmbedUnimplementedPlantStorageServer()
@@ -134,7 +134,7 @@ func (UnimplementedPlantStorageServer) AddNewPlant(context.Context, *AddPlantReq
 func (UnimplementedPlantStorageServer) DeletePlant(context.Context, *PlantRequest) (*DeletePlantReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePlant not implemented")
 }
-func (UnimplementedPlantStorageServer) GetConnectedSensorOverview(context.Context, *GetRequestedSensorStatesRequest) (*GetRequestedSensorStatesResponse, error) {
+func (UnimplementedPlantStorageServer) GetConnectedSensorOverview(context.Context, *GetSensorOverviewRequest) (*GetSensorOverviewResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConnectedSensorOverview not implemented")
 }
 func (UnimplementedPlantStorageServer) GetConnectedDevicesOverview(context.Context, *GetConnectedDevicesRequest) (*GetConnectedDevicesResponse, error) {
@@ -229,7 +229,7 @@ func _PlantStorage_DeletePlant_Handler(srv interface{}, ctx context.Context, dec
 }
 
 func _PlantStorage_GetConnectedSensorOverview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRequestedSensorStatesRequest)
+	in := new(GetSensorOverviewRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -241,7 +241,7 @@ func _PlantStorage_GetConnectedSensorOverview_Handler(srv interface{}, ctx conte
 		FullMethod: "/smart_home.PlantStorage/getConnectedSensorOverview",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlantStorageServer).GetConnectedSensorOverview(ctx, req.(*GetRequestedSensorStatesRequest))
+		return srv.(PlantStorageServer).GetConnectedSensorOverview(ctx, req.(*GetSensorOverviewRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -7,7 +7,7 @@ replace example.com/tobiasjungmann/Himbeergarten_RPi/server/proto => ../server/p
 require (
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/sirupsen/logrus v1.9.3
-	github.com/tobiasjungmann/Himbeergarten_RPi/server v0.0.0-20230805104840-27286995979d
+	github.com/tobiasjungmann/Himbeergarten_RPi/server v0.0.0-20230805171237-8461b7a07477
 	google.golang.org/grpc v1.56.2
 )
 

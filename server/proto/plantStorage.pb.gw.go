@@ -158,7 +158,7 @@ func local_request_PlantStorage_DeletePlant_0(ctx context.Context, marshaler run
 }
 
 func request_PlantStorage_GetConnectedSensorOverview_0(ctx context.Context, marshaler runtime.Marshaler, client PlantStorageClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetRequestedSensorStatesRequest
+	var protoReq GetSensorOverviewRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetConnectedSensorOverview(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -167,7 +167,7 @@ func request_PlantStorage_GetConnectedSensorOverview_0(ctx context.Context, mars
 }
 
 func local_request_PlantStorage_GetConnectedSensorOverview_0(ctx context.Context, marshaler runtime.Marshaler, server PlantStorageServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetRequestedSensorStatesRequest
+	var protoReq GetSensorOverviewRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetConnectedSensorOverview(ctx, &protoReq)

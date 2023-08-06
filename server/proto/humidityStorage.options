@@ -1,1 +1,2 @@
-smart_home.StoreHumidityRequest.deviceId max_size:24
+smart_home.SensorMsg.deviceMAC max_size:24
+smart_home.DeviceOverviewMsg.deviceMAC max_size:24

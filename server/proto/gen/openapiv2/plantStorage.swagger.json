@@ -139,7 +139,7 @@
             "type": "string"
           },
           {
-            "name": "Sensor",
+            "name": "sensorId",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -180,7 +180,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/smart_homeGetRequestedSensorStatesResponse"
+              "$ref": "#/definitions/smart_homeGetSensorOverviewResponse"
             }
           },
           "default": {
@@ -214,7 +214,7 @@
         },
         "parameters": [
           {
-            "name": "sensor",
+            "name": "sensorId",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -279,9 +279,12 @@
     "smart_homeDeviceOverviewMsg": {
       "type": "object",
       "properties": {
-        "deviceId": {
+        "SensorId": {
           "type": "integer",
           "format": "int32"
+        },
+        "deviceMAC": {
+          "type": "string"
         },
         "type": {
           "$ref": "#/definitions/smart_homeDeviceTypes"
@@ -316,7 +319,7 @@
         "gpio": {
           "$ref": "#/definitions/smart_homeGpioIdentifierMsg"
         },
-        "Humidity": {
+        "humidity": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/smart_homeHumidityMsg"
@@ -352,13 +355,13 @@
         }
       }
     },
-    "smart_homeGetRequestedSensorStatesResponse": {
+    "smart_homeGetSensorOverviewResponse": {
       "type": "object",
       "properties": {
         "sensors": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/smart_homeRequestedSensorMsg"
+            "$ref": "#/definitions/smart_homeSensorMsg"
           }
         }
       }
@@ -366,7 +369,7 @@
     "smart_homeGpioIdentifierMsg": {
       "type": "object",
       "properties": {
-        "deviceId": {
+        "sensorId": {
           "type": "integer",
           "format": "int32"
         },
@@ -426,12 +429,11 @@
         }
       }
     },
-    "smart_homeRequestedSensorMsg": {
+    "smart_homeSensorMsg": {
       "type": "object",
       "properties": {
-        "deviceId": {
-          "type": "integer",
-          "format": "int32"
+        "deviceMAC": {
+          "type": "string"
         },
         "sensorId": {
           "type": "integer",
