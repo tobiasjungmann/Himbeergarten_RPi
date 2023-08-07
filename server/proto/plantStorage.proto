@@ -33,11 +33,6 @@ service PlantStorage {
     get: "/sensors"
   };}
 
-  rpc getConnectedDevicesOverview(GetConnectedDevicesRequest) returns (GetConnectedDevicesResponse){
-    option (google.api.http) = {
-      get: "/devices"
-    };
-  }
   rpc GetDataForSensor(GetDataForSensorRequest) returns (GetDataForSensorReply) {
     option (google.api.http) = {
       get: "/sensors/data"
@@ -133,23 +128,6 @@ message GetDataForSensorRequest{
 
 message GetDataForSensorReply{
   repeated HumidityMsg data = 1;
-}
-
-message GetConnectedDevicesRequest{
-
-}
-
-message GetConnectedDevicesResponse{
-  repeated DeviceOverviewMsg devices = 1;
-}
-
-message DeviceOverviewMsg{
-  int32 SensorId = 1;
-  string deviceMAC = 6;
-  DeviceTypes type = 2;
-  string interface = 3;
-  string name = 4;
-  string userId = 5;
 }
 
 enum GpioUser{

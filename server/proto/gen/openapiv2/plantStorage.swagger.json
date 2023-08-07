@@ -16,28 +16,6 @@
     "application/json"
   ],
   "paths": {
-    "/devices": {
-      "get": {
-        "operationId": "PlantStorage_getConnectedDevicesOverview",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/smart_homeGetConnectedDevicesResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "PlantStorage"
-        ]
-      }
-    },
     "/plant": {
       "get": {
         "operationId": "PlantStorage_getAdditionalDataPlant",
@@ -276,39 +254,6 @@
     "smart_homeDeletePlantReply": {
       "type": "object"
     },
-    "smart_homeDeviceOverviewMsg": {
-      "type": "object",
-      "properties": {
-        "SensorId": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "deviceMAC": {
-          "type": "string"
-        },
-        "type": {
-          "$ref": "#/definitions/smart_homeDeviceTypes"
-        },
-        "interface": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "userId": {
-          "type": "string"
-        }
-      }
-    },
-    "smart_homeDeviceTypes": {
-      "type": "string",
-      "enum": [
-        "DEVICE_UNDEFINED",
-        "DEVICE_RPI",
-        "DEVICE_ARDUINO_NANO"
-      ],
-      "default": "DEVICE_UNDEFINED"
-    },
     "smart_homeGetAdditionalDataPlantReply": {
       "type": "object",
       "properties": {
@@ -329,17 +274,6 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/smart_homeImageMsg"
-          }
-        }
-      }
-    },
-    "smart_homeGetConnectedDevicesResponse": {
-      "type": "object",
-      "properties": {
-        "devices": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/smart_homeDeviceOverviewMsg"
           }
         }
       }
