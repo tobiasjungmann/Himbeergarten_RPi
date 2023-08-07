@@ -7,12 +7,20 @@
 #include "pb_encode.h"
 #include "pb_decode.h"
 
-
+/*  === Replace by actual values ===  */
 const char* ssid = "aaaa";           // The SSID (name) of the Wi-Fi network you want to connect to
 const char* password = "asdasdasd";  // The password of the Wi-Fi network
-const char* addr = "192.168.0.4";
-const uint16_t port = 12348;
+const char* addr = "192.168.0.4";    // Ip address of the forwarder interface
+const uint16_t port = 12348;         // Port of the forwarder interface
 
+// Source: https://how2electronics.com/interface-capacitive-soil-moisture-sensor-arduino/
+/*  === Replace by specific values per sensor ===  */
+const int AirValue = 880;    //the value which is returned when the sensor is dry
+const int WaterValue = 470;  //the value which is returned when the sensor is submerged in water
+
+const bool deepSleep = false;  // set to true if the device should deepsleep (Connect RST and D0)
+
+smart_home_StoreHumidityRequest message = smart_home_StoreHumidityRequest_init_zero;
 WiFiClient client;
 
 
@@ -27,22 +35,17 @@ void setup() {
   Serial.println("Sleeping finished");
 }
 
-// Source: https://how2electronics.com/interface-capacitive-soil-moisture-sensor-arduino/
-const int AirValue = 880;    //the value which is returned when the sensor is dry
-const int WaterValue = 470;  //the value which is returned when the sensor is submerged in water
-smart_home_StoreHumidityRequest message = smart_home_StoreHumidityRequest_init_zero;
-
 
 void getMoistureValues() {
   int soilMoistureValue = analogRead(A0);
   Serial.println(soilMoistureValue);
-  int soilmoisturepercent = map(soilMoistureValue, AirValue, WaterValue, 0, 100);
-  if (soilmoisturepercent > 100) {
-    soilmoisturepercent = 100;
-  } else if (soilmoisturepercent < 0) {
-    soilmoisturepercent = 0;
+  int soilMoisturePercent = map(soilMoistureValue, AirValue, WaterValue, 0, 100);
+  if (soilMoisturePercent > 100) {
+    soilMoisturePercent = 100;
+  } else if (soilMoisturePercent < 0) {
+    soilMoisturePercent = 0;
   }
-  message.humidityInPercent = soilmoisturepercent;
+  message.humidityInPercent = soilMoisturePercent;
   message.humidity = soilMoistureValue;
 }
 
@@ -61,12 +64,12 @@ bool waitForConnection() {
   Serial.print("IP address:\t");
   Serial.println(WiFi.localIP());
   Serial.println(WiFi.macAddress());
-  
+
   for (i = 0; i < 15; i++) {
     if (!client.connect(addr, port)) {
       Serial.println("connection failed");
       Serial.println("wait 5 sec to reconnect...");
-    }else{
+    } else {
       return true;
     }
   }
@@ -101,7 +104,10 @@ void loop() {
     message.sensorId = 0;
     sendToForwarder();
   }
- // ESP.deepSleep(20e6);  // 20e6 is 20 microseconds
- // yield();
+  if (deepSleep) {
+    ESP.deepSleep(60e9);  // 1h 
+    yield();
+  } else {
     delay(2000);
+  }
 }
