@@ -11,7 +11,7 @@ import (
 
 func handleProtoBasedSocket() {
 	localIp := "0.0.0.0"
-	ln, err := net.Listen("tcp", fmt.Sprintf("%s:%d", localIp, *port))
+	ln, err := net.Listen("tcp", fmt.Sprintf("%s:%d", localIp, *apiPort))
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)

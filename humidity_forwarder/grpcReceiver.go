@@ -12,7 +12,7 @@ import (
 
 func handleGRPC() {
 	localIp := "0.0.0.0"
-	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", localIp, *port))
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", localIp, *apiPort))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

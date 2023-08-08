@@ -10,4 +10,4 @@ EXPOSE 12348:12348
 COPY *.go ./
 RUN dir -s
 RUN CGO_ENABLED=0 GOOS=linux go build -a -o main
-CMD ["./main","--port","12348","--portStorage","12347","--ipStorage","192.168.0.4"]
+CMD ["./main","-portApi","12348","-ha","-proto","-ipHa","0.0.0.0"]
