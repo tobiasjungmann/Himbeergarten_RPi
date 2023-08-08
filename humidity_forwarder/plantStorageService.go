@@ -29,7 +29,7 @@ func generateToken() (string, error) {
 	return tokenString, nil
 }
 
-func ForwardToPlantServer(id string, value int32) {
+func ForwardToPlantServer(deviceId string, sensorId int32, humidity int32, humidityInPercent int32) {
 	address := fmt.Sprintf("%s:%d", *ipStorage, portStorage)
 	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	log.Info("Forwarder connecting to ", address)

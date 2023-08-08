@@ -67,5 +67,7 @@ func handleConnection(conn net.Conn) {
 	fmt.Printf("{DeviceID:%s, Humidity:%d}\n",
 		e.GetDeviceId(),
 		e.GetHumidity(),
+		forwardData(e.GetDeviceId(),e.GetSensorId(),
+			e.GetHumidity(),e.GetHumidityInPercent())
 	)
 }

@@ -23,9 +23,9 @@ type Attributes struct {
 	FriendlyName      string `json:"friendly_name"`
 }
 
-func ForwardToHA(id string, value int32) {
-	url := fmt.Sprintf("http://%s:8123/api/states/sensor.humidity%s", *ipHa, id)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(generatePayload(value))))
+func ForwardToHA(deviceId string, sensorId int32, humidity int32, humidityInPercent int32) {
+	url := fmt.Sprintf("http://%s:8123/api/states/sensor.humidity%s_%d", *ipHa, deviceId, sensorId)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(generatePayload(humidity, humidityInPercent))))
 
 	if err != nil {
 		log.Error("Error creating HTTP request:", err)
@@ -55,9 +55,9 @@ func ForwardToHA(id string, value int32) {
 	}
 }
 
-func generatePayload(value int32) []byte {
+func generatePayload(humidity int32, humidityInPercent int32) []byte {
 	humidityData := HumidityData{
-		State: fmt.Sprint(value),
+		State: fmt.Sprint(humidity),
 		Attributes: Attributes{
 			UnitOfMeasurement: "%",
 			FriendlyName:      "Humidity data Input 1",

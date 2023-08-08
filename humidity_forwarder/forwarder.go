@@ -49,13 +49,12 @@ func main() {
 	}
 }
 
-func forwardData(id string, value int32) {
-	log.Info("Received ID:", id)
-	log.Info("Received Value:", value)
+func forwardData(deviceId string, sensorId int32, humidity int32, humidityInPercent int32) {
+	log.Info("MAC: %s  Sensor: %d  Value: %d  ValueInPercent: %d", deviceId, sensorId, humidity, humidityInPercent)
 	if *haForwarder {
-		ForwardToHA(id, value)
+		ForwardToHA(deviceId, sensorId, humidity, humidityInPercent)
 	}
 	if *storageForwarder {
-		ForwardToPlantServer(id, value)
+		ForwardToPlantServer(deviceId, sensorId, humidity, humidityInPercent)
 	}
 }

@@ -10,7 +10,7 @@
 /*  === Replace by actual values ===  */
 const char* ssid = "aaaa";           // The SSID (name) of the Wi-Fi network you want to connect to
 const char* password = "asdasdasd";  // The password of the Wi-Fi network
-const char* addr = "192.168.0.4";    // Ip address of the forwarder interface
+const char* addr = "192.168.0.6";    // Ip address of the forwarder interface
 const uint16_t port = 12348;         // Port of the forwarder interface
 
 // Source: https://how2electronics.com/interface-capacitive-soil-moisture-sensor-arduino/
@@ -67,11 +67,11 @@ bool waitForConnection() {
 
   for (i = 0; i < 15; i++) {
     if (!client.connect(addr, port)) {
-      Serial.println("connection failed");
-      Serial.println("wait 5 sec to reconnect...");
+      Serial.println("connection to server failed waiting to reconnect...");
     } else {
       return true;
     }
+    delay(1000);
   }
   return false;
 }
@@ -108,6 +108,6 @@ void loop() {
     ESP.deepSleep(60e9);  // 1h 
     yield();
   } else {
-    delay(2000);
+    delay(5000);
   }
 }
