@@ -7,10 +7,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+	"strings"
 )
 
 const (
-	testTokenHomeAssistant = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI4MzczNDExNWFlNDc0ZGY4YjJiOGRlNWEzMDZkNTFkMCIsImlhdCI6MTY5MDY0NzM1MSwiZXhwIjoyMDA2MDA3MzUxfQ.RBXcYVaGhas-GPBt-04jE56TX1X50E7ypTJIKR-7zYQ"
+	testTokenHomeAssistant = ""
 )
 
 type HumidityData struct {
@@ -21,10 +22,13 @@ type HumidityData struct {
 type Attributes struct {
 	UnitOfMeasurement string `json:"unit_of_measurement"`
 	FriendlyName      string `json:"friendly_name"`
+	ValueInPercent    string `valueInPercent`
 }
 
 func ForwardToHA(deviceId string, sensorId int32, humidity int32, humidityInPercent int32) {
-	url := fmt.Sprintf("http://%s:8123/api/states/sensor.humidity%s_%d", *ipHa, deviceId, sensorId)
+	macForURL := strings.Replace(deviceId, ":", "_", 5)
+	url := fmt.Sprintf("http://%s:8123/api/states/sensor.humidity%s_sensor%d", *ipHa, macForURL, sensorId)
+	log.Info("HA Address: ", url)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(generatePayload(humidity, humidityInPercent))))
 
 	if err != nil {
@@ -51,7 +55,7 @@ func ForwardToHA(deviceId string, sensorId int32, humidity int32, humidityInPerc
 	if resp.StatusCode == http.StatusOK {
 		log.Info("Request successful!")
 	} else {
-		log.Info("Request failed with status code:", resp.StatusCode)
+		log.Info("Request to Home Assistant failed with status code:", resp.StatusCode)
 	}
 }
 
@@ -61,6 +65,7 @@ func generatePayload(humidity int32, humidityInPercent int32) []byte {
 		Attributes: Attributes{
 			UnitOfMeasurement: "%",
 			FriendlyName:      "Humidity data Input 1",
+			ValueInPercent:    "76%",
 		},
 	}
 	jsonData, err := json.Marshal(humidityData)

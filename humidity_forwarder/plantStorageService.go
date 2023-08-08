@@ -40,7 +40,7 @@ func ForwardToPlantServer(deviceId string, sensorId int32, humidity int32, humid
 	s, _ := generateToken()
 	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", s)
 
-	_, errStore := c.StoreHumidityEntry(ctx, &pb.StoreHumidityRequest{DeviceId: &id, Humidity: &value})
+	_, errStore := c.StoreHumidityEntry(ctx, &pb.StoreHumidityRequest{DeviceId: &deviceId, SensorId: &sensorId, Humidity: &humidity, HumidityInPercent: &humidityInPercent})
 
 	if errStore != nil {
 		log.Error(errStore.Error())

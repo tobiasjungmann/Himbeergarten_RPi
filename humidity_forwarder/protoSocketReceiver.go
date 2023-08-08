@@ -40,9 +40,9 @@ func handleProtoBasedSocket() {
 
 func handleConnection(conn net.Conn) {
 	defer func() {
-		log.Println("INFO: closing connection")
+		log.Info("closing connection")
 		if err := conn.Close(); err != nil {
-			log.Println("error closing connection:", err)
+			log.Info("error closing connection:", err)
 		}
 	}()
 
@@ -50,24 +50,24 @@ func handleConnection(conn net.Conn) {
 
 	n, err := conn.Read(buf)
 	if err != nil {
-		log.Println(err)
+		log.Info(err)
 		return
 	}
 	if n <= 0 {
-		log.Println("no data received")
+		log.Info("no data received")
 		return
 	}
 
 	var e pb.StoreHumidityRequest
 	if err := proto.Unmarshal(buf[:n], &e); err != nil {
-		log.Println("failed to unmarshal:", err)
+		log.Info("failed to unmarshal:", err)
 		return
 	}
 
-	fmt.Printf("{DeviceID:%s, Humidity:%d}\n",
-		e.GetDeviceId(),
-		e.GetHumidity(),
-		forwardData(e.GetDeviceId(),e.GetSensorId(),
-			e.GetHumidity(),e.GetHumidityInPercent())
-	)
+	/*log.Printf("{DeviceID:%s, Humidity:%d}\n",
+	e.GetDeviceId(),
+	e.GetHumidity())*/
+	forwardData(e.GetDeviceId(), e.GetSensorId(),
+		e.GetHumidity(), e.GetHumidityInPercent())
+
 }

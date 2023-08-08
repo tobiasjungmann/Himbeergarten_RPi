@@ -38,7 +38,7 @@ func receiveHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}(r.Body)
 
-		forwardData(message.ID, message.Value)
+		forwardData(message.ID, message.Value, 0, 0)
 	} else {
 		http.Error(w, "Invalid request method. Only POST is allowed.", http.StatusMethodNotAllowed)
 	}

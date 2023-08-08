@@ -50,7 +50,7 @@ func main() {
 }
 
 func forwardData(deviceId string, sensorId int32, humidity int32, humidityInPercent int32) {
-	log.Info("MAC: %s  Sensor: %d  Value: %d  ValueInPercent: %d", deviceId, sensorId, humidity, humidityInPercent)
+	log.Printf("MAC: %s  Sensor: %d  Value: %d  ValueInPercent: %d\n", deviceId, sensorId, humidity, humidityInPercent)
 	if *haForwarder {
 		ForwardToHA(deviceId, sensorId, humidity, humidityInPercent)
 	}
