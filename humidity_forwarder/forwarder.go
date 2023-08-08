@@ -4,6 +4,7 @@ import (
 	"flag"
 	log "github.com/sirupsen/logrus"
 	pb "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto"
+	"os"
 )
 
 var (
@@ -34,6 +35,13 @@ func main() {
 	if !*haForwarder && !*storageForwarder {
 		log.Fatalf("No Forwarding option selected. Set at least one.")
 		return
+	}
+	if *haForwarder {
+		apiToken := os.Getenv("HOME_ASSISTANT_TOKEN")
+		if apiToken == "" {
+			log.Fatalf("HOME_ASSISTANT_TOKEN environment variable not set. Set it with `export HOME_ASSISTANT_TOKEN=secretToken`")
+			return
+		}
 	}
 	if *restReceiver {
 		handleHTTP()
