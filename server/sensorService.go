@@ -46,7 +46,7 @@ func startSensorAPI(db *gorm.DB) {
 	}
 }
 
-func (s server) GetActiveSensorsForDevice(_ context.Context, request *pb.GetActiveSensorsForDeviceRequest) (*pb.StoreHumidityReply, error) {
+func (s server) GetActiveSensorsForDevice(_ context.Context, request *pb.GetActiveSensorsRequest) (*pb.GetActiveSensorsReply, error) {
 	var sensor models.Sensor
 	result := s.db.Model(&models.Sensor{}).
 		Where(models.Sensor{SensorSlot: *request.SensorId, DeviceMAC: *request.DeviceMAC}).

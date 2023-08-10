@@ -67,13 +67,13 @@ func handleConnection(conn net.Conn) {
 	} else {
 		var activeSensors pb.GetActiveSensorsRequest
 		if err := proto.Unmarshal(buf[:n], &activeSensors); err == nil {
-			log.Info("Received Active Sensor request")
-			/*write, err := conn.Write([]byte("Hello World\n"))
-			println(write)
+			log.Info("Received Active Sensor request from ", *activeSensors.DeviceMAC)
+
+			_, err := conn.Write([]byte("Hello World\n"))
 			if err != nil {
 				log.Info("Error while answering the client: ", err)
 				return
-			}*/
+			}
 			return
 		}
 	}

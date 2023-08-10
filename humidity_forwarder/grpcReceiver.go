@@ -42,3 +42,8 @@ func (s server) StoreHumidityEntry(_ context.Context, request *pb.StoreHumidityR
 	forwardData(*request.DeviceMAC, *request.SensorId, *request.Humidity, *request.HumidityInPercent)
 	return &pb.StoreHumidityReply{}, nil
 }
+
+func (s server) GetActiveSensorsForDevice(ctx context.Context, request *pb.GetActiveSensorsRequest) (*pb.GetActiveSensorsReply, error) {
+	//TODO implement me - nopt needed to forward
+	panic("implement me")
+}
