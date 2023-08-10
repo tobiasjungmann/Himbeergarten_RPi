@@ -111,12 +111,20 @@ void getSensors(){
     return;
   }
 
-  Serial.printf("Amount of Bytes %d\n", stream.bytes_written);
+  /*Serial.printf("Amount of Bytes %d\n", stream.bytes_written);
   for (int i = 0; i < stream.bytes_written; i++) {
     Serial.printf("%02X", buffer[i]);
-  }
+  }*/
 
   client.write(buffer, stream.bytes_written);
+   String serverResponse = "";
+  while (client.available()) {
+    Serial.println("Reading one line from intput...");
+    String line = client.readStringUntil('\n');
+    serverResponse += line;
+  }
+  Serial.println("Server response: " + serverResponse);
+ client.stop();
 }
 
 void loop() {

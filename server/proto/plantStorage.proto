@@ -28,23 +28,27 @@ service PlantStorage {
     put: "/plant/delete"
   };}
 
+  // Get an overview of all Devices given by a mac address and the sensorlots which are avilable
   rpc getConnectedSensorOverview(GetSensorOverviewRequest) returns (GetSensorOverviewReply) {
     option (google.api.http) = {
     get: "/sensors"
   };}
 
+  // get the data for a sensor given by its sensorslot and the mac address of the connected device
   rpc GetDataForSensor(GetDataForSensorRequest) returns (GetDataForSensorReply) {
     option (google.api.http) = {
       get: "/sensors/data"
     };
   }
 
+  // Get the list of all Sensor Ids which are available for a device given by its mac address
   rpc GetSensorsForDevice(GetSensorsForDeviceRequest) returns (GetSensorsForDeviceReply){
     option (google.api.http) = {
       get: "/device/sensors"
     };
   }
 
+  // Set the list of sensors which are available at a device which should measure their values
   rpc SetActiveSensorsForDevice(SetActiveSensorsForDeviceRequest) returns (SetActiveSensorsForDeviceReply){
     option (google.api.http) = {
       get: "/device/activated"
@@ -147,8 +151,9 @@ message GetAdditionalDataPlantReply{
 }
 
 message GetDataForSensorRequest{
-  int32 sensorId = 1;
-  optional int64 limit = 2;
+  string deviceMAC = 1;
+  int32 sensorId = 2;
+  optional int64 limit = 3;
 }
 
 message GetDataForSensorReply{

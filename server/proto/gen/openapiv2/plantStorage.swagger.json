@@ -18,6 +18,7 @@
   "paths": {
     "/device/activated": {
       "get": {
+        "summary": "Set the list of sensors which are available at a device which should measure their values",
         "operationId": "PlantStorage_SetActiveSensorsForDevice",
         "responses": {
           "200": {
@@ -59,6 +60,7 @@
     },
     "/device/sensors": {
       "get": {
+        "summary": "Get the list of all Sensor Ids which are available for a device given by its mac address",
         "operationId": "PlantStorage_GetSensorsForDevice",
         "responses": {
           "200": {
@@ -224,6 +226,7 @@
     },
     "/sensors": {
       "get": {
+        "summary": "Get an overview of all Devices given by a mac address and the sensorlots which are avilable",
         "operationId": "PlantStorage_getConnectedSensorOverview",
         "responses": {
           "200": {
@@ -246,6 +249,7 @@
     },
     "/sensors/data": {
       "get": {
+        "summary": "get the data for a sensor given by its sensorslot and the mac address of the connected device",
         "operationId": "PlantStorage_GetDataForSensor",
         "responses": {
           "200": {
@@ -262,6 +266,12 @@
           }
         },
         "parameters": [
+          {
+            "name": "deviceMAC",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
           {
             "name": "sensorId",
             "in": "query",

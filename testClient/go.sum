@@ -26,8 +26,6 @@ github.com/sirupsen/logrus v1.9.3/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVs
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/tobiasjungmann/Himbeergarten_RPi/server v0.0.0-20230806151313-d8e2f2003e1f h1:Lszl5QmJWP88OFGdYKwZJ8uS2XMAdb0bv5SOn54bU0o=
-github.com/tobiasjungmann/Himbeergarten_RPi/server v0.0.0-20230806151313-d8e2f2003e1f/go.mod h1:ZmlLmhICgswuSwTTH6CoVZsf/Vve+mTQZSe5XZBOzUY=
 github.com/tobiasjungmann/Himbeergarten_RPi/server v0.0.0-20230810091347-eca807c090e3 h1:e/kaVqeFGeer1vxZdTYkkpPPLJLnXSJu3knsrVJtDI0=
 github.com/tobiasjungmann/Himbeergarten_RPi/server v0.0.0-20230810091347-eca807c090e3/go.mod h1:Tmkh0LUsn7i2i0UOYwZT03dVQSpnHBaQIK32DsIjRGY=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=

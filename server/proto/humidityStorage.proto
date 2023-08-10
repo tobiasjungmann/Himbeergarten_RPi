@@ -6,7 +6,7 @@ option java_package = "com.example.rpicommunicator_v1";
 
 service HumidityStorage {
   rpc storeHumidityEntry(StoreHumidityRequest) returns (StoreHumidityReply);
-  rpc GetActiveSensorsForDevice(StoreHumidityRequest) returns (StoreHumidityReply);
+  rpc GetActiveSensorsForDevice(GetActiveSensorsRequest) returns (GetActiveSensorsReply);
 }
 
 message StoreHumidityRequest{
@@ -16,14 +16,14 @@ message StoreHumidityRequest{
   required int32 humidityInPercent = 4;
 }
 
+message StoreHumidityReply{
+}
+
 message GetActiveSensorsRequest{
   required string deviceMAC = 1;
   repeated uint32 availableSensors = 2;
 }
 
-message GetActiveSensorsResponse{
+message GetActiveSensorsReply{
   repeated uint32 sensors = 1;
-}
-
-message StoreHumidityReply{
 }

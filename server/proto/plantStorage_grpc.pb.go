@@ -27,9 +27,13 @@ type PlantStorageClient interface {
 	// Also used to update a plant with the same id if it already exists
 	AddNewPlant(ctx context.Context, in *AddPlantRequest, opts ...grpc.CallOption) (*PlantOverviewMsg, error)
 	DeletePlant(ctx context.Context, in *PlantRequest, opts ...grpc.CallOption) (*DeletePlantReply, error)
+	// Get an overview of all Devices given by a mac address and the sensorlots which are avilable
 	GetConnectedSensorOverview(ctx context.Context, in *GetSensorOverviewRequest, opts ...grpc.CallOption) (*GetSensorOverviewReply, error)
+	// get the data for a sensor given by its sensorslot and the mac address of the connected device
 	GetDataForSensor(ctx context.Context, in *GetDataForSensorRequest, opts ...grpc.CallOption) (*GetDataForSensorReply, error)
+	// Get the list of all Sensor Ids which are available for a device given by its mac address
 	GetSensorsForDevice(ctx context.Context, in *GetSensorsForDeviceRequest, opts ...grpc.CallOption) (*GetSensorsForDeviceReply, error)
+	// Set the list of sensors which are available at a device which should measure their values
 	SetActiveSensorsForDevice(ctx context.Context, in *SetActiveSensorsForDeviceRequest, opts ...grpc.CallOption) (*SetActiveSensorsForDeviceReply, error)
 }
 
@@ -122,9 +126,13 @@ type PlantStorageServer interface {
 	// Also used to update a plant with the same id if it already exists
 	AddNewPlant(context.Context, *AddPlantRequest) (*PlantOverviewMsg, error)
 	DeletePlant(context.Context, *PlantRequest) (*DeletePlantReply, error)
+	// Get an overview of all Devices given by a mac address and the sensorlots which are avilable
 	GetConnectedSensorOverview(context.Context, *GetSensorOverviewRequest) (*GetSensorOverviewReply, error)
+	// get the data for a sensor given by its sensorslot and the mac address of the connected device
 	GetDataForSensor(context.Context, *GetDataForSensorRequest) (*GetDataForSensorReply, error)
+	// Get the list of all Sensor Ids which are available for a device given by its mac address
 	GetSensorsForDevice(context.Context, *GetSensorsForDeviceRequest) (*GetSensorsForDeviceReply, error)
+	// Set the list of sensors which are available at a device which should measure their values
 	SetActiveSensorsForDevice(context.Context, *SetActiveSensorsForDeviceRequest) (*SetActiveSensorsForDeviceReply, error)
 	mustEmbedUnimplementedPlantStorageServer()
 }

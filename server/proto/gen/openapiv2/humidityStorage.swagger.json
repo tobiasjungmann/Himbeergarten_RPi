@@ -44,6 +44,18 @@
         }
       }
     },
+    "smart_homeGetActiveSensorsReply": {
+      "type": "object",
+      "properties": {
+        "sensors": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      }
+    },
     "smart_homeStoreHumidityReply": {
       "type": "object"
     }
