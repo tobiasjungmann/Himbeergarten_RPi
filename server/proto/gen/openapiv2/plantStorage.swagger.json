@@ -16,6 +16,77 @@
     "application/json"
   ],
   "paths": {
+    "/device/activated": {
+      "get": {
+        "operationId": "PlantStorage_SetActiveSensorsForDevice",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/smart_homeSetActiveSensorsForDeviceReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deviceMAC",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "activated",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "multi"
+          }
+        ],
+        "tags": [
+          "PlantStorage"
+        ]
+      }
+    },
+    "/device/sensors": {
+      "get": {
+        "operationId": "PlantStorage_GetSensorsForDevice",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/smart_homeGetSensorsForDeviceReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deviceMAC",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "PlantStorage"
+        ]
+      }
+    },
     "/plant": {
       "get": {
         "operationId": "PlantStorage_getAdditionalDataPlant",
@@ -158,7 +229,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/smart_homeGetSensorOverviewResponse"
+              "$ref": "#/definitions/smart_homeGetSensorOverviewReply"
             }
           },
           "default": {
@@ -289,13 +360,25 @@
         }
       }
     },
-    "smart_homeGetSensorOverviewResponse": {
+    "smart_homeGetSensorOverviewReply": {
       "type": "object",
       "properties": {
         "sensors": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/smart_homeSensorMsg"
+          }
+        }
+      }
+    },
+    "smart_homeGetSensorsForDeviceReply": {
+      "type": "object",
+      "properties": {
+        "sensors": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       }
@@ -385,6 +468,9 @@
           "format": "int32"
         }
       }
+    },
+    "smart_homeSetActiveSensorsForDeviceReply": {
+      "type": "object"
     }
   }
 }

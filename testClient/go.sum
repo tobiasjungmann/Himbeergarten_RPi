@@ -28,6 +28,8 @@ github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5Cc
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/tobiasjungmann/Himbeergarten_RPi/server v0.0.0-20230806151313-d8e2f2003e1f h1:Lszl5QmJWP88OFGdYKwZJ8uS2XMAdb0bv5SOn54bU0o=
 github.com/tobiasjungmann/Himbeergarten_RPi/server v0.0.0-20230806151313-d8e2f2003e1f/go.mod h1:ZmlLmhICgswuSwTTH6CoVZsf/Vve+mTQZSe5XZBOzUY=
+github.com/tobiasjungmann/Himbeergarten_RPi/server v0.0.0-20230810091347-eca807c090e3 h1:e/kaVqeFGeer1vxZdTYkkpPPLJLnXSJu3knsrVJtDI0=
+github.com/tobiasjungmann/Himbeergarten_RPi/server v0.0.0-20230810091347-eca807c090e3/go.mod h1:Tmkh0LUsn7i2i0UOYwZT03dVQSpnHBaQIK32DsIjRGY=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=

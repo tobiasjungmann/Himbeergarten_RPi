@@ -6,7 +6,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/paypal/gatt v0.0.0-20151011220935-4ae819d591cf
 	github.com/sirupsen/logrus v1.9.3
-	github.com/tobiasjungmann/Himbeergarten_RPi/server v0.0.0-20230806151313-d8e2f2003e1f
+	github.com/tobiasjungmann/Himbeergarten_RPi/server v0.0.0-20230810091347-eca807c090e3
 	google.golang.org/grpc v1.57.0
 	google.golang.org/protobuf v1.31.0
 )
@@ -18,7 +18,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/mattn/go-sqlite3 v1.14.17 // indirect
-	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8 // indirect
+	golang.org/x/image v0.1.0 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
 	golang.org/x/text v0.11.0 // indirect

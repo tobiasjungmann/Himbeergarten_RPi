@@ -28,7 +28,7 @@ service PlantStorage {
     put: "/plant/delete"
   };}
 
-  rpc getConnectedSensorOverview(GetSensorOverviewRequest) returns (GetSensorOverviewResponse) {
+  rpc getConnectedSensorOverview(GetSensorOverviewRequest) returns (GetSensorOverviewReply) {
     option (google.api.http) = {
     get: "/sensors"
   };}
@@ -39,13 +39,38 @@ service PlantStorage {
     };
   }
 
+  rpc GetSensorsForDevice(GetSensorsForDeviceRequest) returns (GetSensorsForDeviceReply){
+    option (google.api.http) = {
+      get: "/device/sensors"
+    };
+  }
+
+  rpc SetActiveSensorsForDevice(SetActiveSensorsForDeviceRequest) returns (SetActiveSensorsForDeviceReply){
+    option (google.api.http) = {
+      get: "/device/activated"
+    };
+  }
 }
 
 message GetSensorOverviewRequest{
 }
 
-message GetSensorOverviewResponse{
+message GetSensorOverviewReply{
   repeated SensorMsg sensors = 1;
+}
+
+message GetSensorsForDeviceRequest{
+  string deviceMAC=1;
+}
+message GetSensorsForDeviceReply{
+  repeated uint32 sensors=1;
+}
+
+message SetActiveSensorsForDeviceRequest{
+  string deviceMAC=1;
+  repeated uint32 activated=2;
+}
+message SetActiveSensorsForDeviceReply{
 }
 
 message SensorMsg{

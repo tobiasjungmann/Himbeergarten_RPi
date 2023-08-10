@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type HumidityStorageClient interface {
 	StoreHumidityEntry(ctx context.Context, in *StoreHumidityRequest, opts ...grpc.CallOption) (*StoreHumidityReply, error)
+	GetActiveSensorsForDevice(ctx context.Context, in *StoreHumidityRequest, opts ...grpc.CallOption) (*StoreHumidityReply, error)
 }
 
 type humidityStorageClient struct {
@@ -42,11 +43,21 @@ func (c *humidityStorageClient) StoreHumidityEntry(ctx context.Context, in *Stor
 	return out, nil
 }
 
+func (c *humidityStorageClient) GetActiveSensorsForDevice(ctx context.Context, in *StoreHumidityRequest, opts ...grpc.CallOption) (*StoreHumidityReply, error) {
+	out := new(StoreHumidityReply)
+	err := c.cc.Invoke(ctx, "/smart_home.HumidityStorage/GetActiveSensorsForDevice", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // HumidityStorageServer is the server API for HumidityStorage service.
 // All implementations must embed UnimplementedHumidityStorageServer
 // for forward compatibility
 type HumidityStorageServer interface {
 	StoreHumidityEntry(context.Context, *StoreHumidityRequest) (*StoreHumidityReply, error)
+	GetActiveSensorsForDevice(context.Context, *StoreHumidityRequest) (*StoreHumidityReply, error)
 	mustEmbedUnimplementedHumidityStorageServer()
 }
 
@@ -56,6 +67,9 @@ type UnimplementedHumidityStorageServer struct {
 
 func (UnimplementedHumidityStorageServer) StoreHumidityEntry(context.Context, *StoreHumidityRequest) (*StoreHumidityReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StoreHumidityEntry not implemented")
+}
+func (UnimplementedHumidityStorageServer) GetActiveSensorsForDevice(context.Context, *StoreHumidityRequest) (*StoreHumidityReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetActiveSensorsForDevice not implemented")
 }
 func (UnimplementedHumidityStorageServer) mustEmbedUnimplementedHumidityStorageServer() {}
 
@@ -88,6 +102,24 @@ func _HumidityStorage_StoreHumidityEntry_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _HumidityStorage_GetActiveSensorsForDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StoreHumidityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HumidityStorageServer).GetActiveSensorsForDevice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/smart_home.HumidityStorage/GetActiveSensorsForDevice",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HumidityStorageServer).GetActiveSensorsForDevice(ctx, req.(*StoreHumidityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // HumidityStorage_ServiceDesc is the grpc.ServiceDesc for HumidityStorage service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +130,10 @@ var HumidityStorage_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "storeHumidityEntry",
 			Handler:    _HumidityStorage_StoreHumidityEntry_Handler,
+		},
+		{
+			MethodName: "GetActiveSensorsForDevice",
+			Handler:    _HumidityStorage_GetActiveSensorsForDevice_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

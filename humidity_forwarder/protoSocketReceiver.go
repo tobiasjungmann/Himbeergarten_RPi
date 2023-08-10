@@ -39,12 +39,12 @@ func handleProtoBasedSocket() {
 }
 
 func handleConnection(conn net.Conn) {
-	defer func() {
+	/*defer func() {
 		log.Info("closing connection")
 		if err := conn.Close(); err != nil {
 			log.Info("error closing connection:", err)
 		}
-	}()
+	}()*/
 
 	buf := make([]byte, 1024)
 
@@ -58,20 +58,26 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 
-	var e pb.StoreHumidityRequest
-	if err := proto.Unmarshal(buf[:n], &e); err == nil {
-		log.Info("failed to unmarshal:", err)
-		forwardData(e.GetDeviceId(), e.GetSensorId(),
-			e.GetHumidity(), e.GetHumidityInPercent())
+	var storeHumidity pb.StoreHumidityRequest
+	if err := proto.Unmarshal(buf[:n], &storeHumidity); err == nil {
+		//log.Info("failed to unmarshal:", err)
+		forwardData(storeHumidity.GetDeviceMAC(), storeHumidity.GetSensorId(),
+			storeHumidity.GetHumidity(), storeHumidity.GetHumidityInPercent())
 		return
 	} else {
-		e = pb.getActiveSensorRequest
-		if err := proto.Unmarshal(buf[:n], &e); err != nil {
-			log.Info("failed to unmarshal:", err)
-
+		var activeSensors pb.GetActiveSensorsRequest
+		if err := proto.Unmarshal(buf[:n], &activeSensors); err == nil {
+			log.Info("Received Active Sensor request")
+			/*write, err := conn.Write([]byte("Hello World\n"))
+			println(write)
+			if err != nil {
+				log.Info("Error while answering the client: ", err)
+				return
+			}*/
 			return
 		}
 	}
+	log.Info("failed to unmarshal:", err)
 
 	/*log.Printf("{DeviceID:%s, Humidity:%d}\n",
 	e.GetDeviceId(),

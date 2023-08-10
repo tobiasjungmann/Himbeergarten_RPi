@@ -27,8 +27,10 @@ type PlantStorageClient interface {
 	// Also used to update a plant with the same id if it already exists
 	AddNewPlant(ctx context.Context, in *AddPlantRequest, opts ...grpc.CallOption) (*PlantOverviewMsg, error)
 	DeletePlant(ctx context.Context, in *PlantRequest, opts ...grpc.CallOption) (*DeletePlantReply, error)
-	GetConnectedSensorOverview(ctx context.Context, in *GetSensorOverviewRequest, opts ...grpc.CallOption) (*GetSensorOverviewResponse, error)
+	GetConnectedSensorOverview(ctx context.Context, in *GetSensorOverviewRequest, opts ...grpc.CallOption) (*GetSensorOverviewReply, error)
 	GetDataForSensor(ctx context.Context, in *GetDataForSensorRequest, opts ...grpc.CallOption) (*GetDataForSensorReply, error)
+	GetSensorsForDevice(ctx context.Context, in *GetSensorsForDeviceRequest, opts ...grpc.CallOption) (*GetSensorsForDeviceReply, error)
+	SetActiveSensorsForDevice(ctx context.Context, in *SetActiveSensorsForDeviceRequest, opts ...grpc.CallOption) (*SetActiveSensorsForDeviceReply, error)
 }
 
 type plantStorageClient struct {
@@ -75,8 +77,8 @@ func (c *plantStorageClient) DeletePlant(ctx context.Context, in *PlantRequest, 
 	return out, nil
 }
 
-func (c *plantStorageClient) GetConnectedSensorOverview(ctx context.Context, in *GetSensorOverviewRequest, opts ...grpc.CallOption) (*GetSensorOverviewResponse, error) {
-	out := new(GetSensorOverviewResponse)
+func (c *plantStorageClient) GetConnectedSensorOverview(ctx context.Context, in *GetSensorOverviewRequest, opts ...grpc.CallOption) (*GetSensorOverviewReply, error) {
+	out := new(GetSensorOverviewReply)
 	err := c.cc.Invoke(ctx, "/smart_home.PlantStorage/getConnectedSensorOverview", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -93,6 +95,24 @@ func (c *plantStorageClient) GetDataForSensor(ctx context.Context, in *GetDataFo
 	return out, nil
 }
 
+func (c *plantStorageClient) GetSensorsForDevice(ctx context.Context, in *GetSensorsForDeviceRequest, opts ...grpc.CallOption) (*GetSensorsForDeviceReply, error) {
+	out := new(GetSensorsForDeviceReply)
+	err := c.cc.Invoke(ctx, "/smart_home.PlantStorage/GetSensorsForDevice", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *plantStorageClient) SetActiveSensorsForDevice(ctx context.Context, in *SetActiveSensorsForDeviceRequest, opts ...grpc.CallOption) (*SetActiveSensorsForDeviceReply, error) {
+	out := new(SetActiveSensorsForDeviceReply)
+	err := c.cc.Invoke(ctx, "/smart_home.PlantStorage/SetActiveSensorsForDevice", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlantStorageServer is the server API for PlantStorage service.
 // All implementations must embed UnimplementedPlantStorageServer
 // for forward compatibility
@@ -102,8 +122,10 @@ type PlantStorageServer interface {
 	// Also used to update a plant with the same id if it already exists
 	AddNewPlant(context.Context, *AddPlantRequest) (*PlantOverviewMsg, error)
 	DeletePlant(context.Context, *PlantRequest) (*DeletePlantReply, error)
-	GetConnectedSensorOverview(context.Context, *GetSensorOverviewRequest) (*GetSensorOverviewResponse, error)
+	GetConnectedSensorOverview(context.Context, *GetSensorOverviewRequest) (*GetSensorOverviewReply, error)
 	GetDataForSensor(context.Context, *GetDataForSensorRequest) (*GetDataForSensorReply, error)
+	GetSensorsForDevice(context.Context, *GetSensorsForDeviceRequest) (*GetSensorsForDeviceReply, error)
+	SetActiveSensorsForDevice(context.Context, *SetActiveSensorsForDeviceRequest) (*SetActiveSensorsForDeviceReply, error)
 	mustEmbedUnimplementedPlantStorageServer()
 }
 
@@ -123,11 +145,17 @@ func (UnimplementedPlantStorageServer) AddNewPlant(context.Context, *AddPlantReq
 func (UnimplementedPlantStorageServer) DeletePlant(context.Context, *PlantRequest) (*DeletePlantReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePlant not implemented")
 }
-func (UnimplementedPlantStorageServer) GetConnectedSensorOverview(context.Context, *GetSensorOverviewRequest) (*GetSensorOverviewResponse, error) {
+func (UnimplementedPlantStorageServer) GetConnectedSensorOverview(context.Context, *GetSensorOverviewRequest) (*GetSensorOverviewReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConnectedSensorOverview not implemented")
 }
 func (UnimplementedPlantStorageServer) GetDataForSensor(context.Context, *GetDataForSensorRequest) (*GetDataForSensorReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDataForSensor not implemented")
+}
+func (UnimplementedPlantStorageServer) GetSensorsForDevice(context.Context, *GetSensorsForDeviceRequest) (*GetSensorsForDeviceReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSensorsForDevice not implemented")
+}
+func (UnimplementedPlantStorageServer) SetActiveSensorsForDevice(context.Context, *SetActiveSensorsForDeviceRequest) (*SetActiveSensorsForDeviceReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetActiveSensorsForDevice not implemented")
 }
 func (UnimplementedPlantStorageServer) mustEmbedUnimplementedPlantStorageServer() {}
 
@@ -250,6 +278,42 @@ func _PlantStorage_GetDataForSensor_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlantStorage_GetSensorsForDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSensorsForDeviceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlantStorageServer).GetSensorsForDevice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/smart_home.PlantStorage/GetSensorsForDevice",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlantStorageServer).GetSensorsForDevice(ctx, req.(*GetSensorsForDeviceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlantStorage_SetActiveSensorsForDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetActiveSensorsForDeviceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlantStorageServer).SetActiveSensorsForDevice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/smart_home.PlantStorage/SetActiveSensorsForDevice",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlantStorageServer).SetActiveSensorsForDevice(ctx, req.(*SetActiveSensorsForDeviceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PlantStorage_ServiceDesc is the grpc.ServiceDesc for PlantStorage service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -280,6 +344,14 @@ var PlantStorage_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetDataForSensor",
 			Handler:    _PlantStorage_GetDataForSensor_Handler,
+		},
+		{
+			MethodName: "GetSensorsForDevice",
+			Handler:    _PlantStorage_GetSensorsForDevice_Handler,
+		},
+		{
+			MethodName: "SetActiveSensorsForDevice",
+			Handler:    _PlantStorage_SetActiveSensorsForDevice_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

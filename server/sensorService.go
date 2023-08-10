@@ -49,14 +49,49 @@ func startSensorAPI(db *gorm.DB) {
 func (s server) StoreHumidityEntry(_ context.Context, request *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
 	var sensor models.Sensor
 	result := s.db.Model(&models.Sensor{}).
-		Where(models.Sensor{SensorSlot: *request.SensorId, DeviceMAC: *request.DeviceId}).
+		Where(models.Sensor{SensorSlot: *request.SensorId, DeviceMAC: *request.DeviceMAC}).
 		First(&sensor).Error
 	sensorId := sensor.Sensor
 	if result != nil {
 		log.WithError(result).Error("Creating new Sensor.")
 		sensor := models.Sensor{
 			SensorSlot: *request.SensorId,
-			DeviceMAC:  *request.DeviceId,
+			DeviceMAC:  *request.DeviceMAC,
+			InUse:      false,
+		}
+		errCreateSensor := s.db.Model(&models.Sensor{}).Create(&sensor).Error
+		if errCreateSensor != nil {
+			log.Fatalf("Error: Unable to create the new Plant. Errormessage: %s", errCreateSensor.Error())
+		}
+
+		sensorId = sensor.Sensor
+	}
+
+	err := s.db.Model(&models.HumidityEntry{}).Create(&models.HumidityEntry{
+		Sensor:         sensorId,
+		Value:          *request.Humidity,
+		ValueInPercent: *request.HumidityInPercent,
+		Timestamp:      time.Now(),
+	}).Error
+	if err != nil {
+		log.Fatalf("Error: New Humidity Entry for Plant %d with value %d was not created. Errormessage: %s", sensorId, request.GetHumidity(), err.Error())
+	} else {
+		log.Println("New Humidity Entry for Plant %i with value %i", sensorId, request.GetHumidity())
+	}
+	return &pb.StoreHumidityReply{}, nil
+}
+
+func (s server) StoreHumidityEntry(_ context.Context, request *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
+	var sensor models.Sensor
+	result := s.db.Model(&models.Sensor{}).
+		Where(models.Sensor{SensorSlot: *request.SensorId, DeviceMAC: *request.DeviceMAC}).
+		First(&sensor).Error
+	sensorId := sensor.Sensor
+	if result != nil {
+		log.WithError(result).Error("Creating new Sensor.")
+		sensor := models.Sensor{
+			SensorSlot: *request.SensorId,
+			DeviceMAC:  *request.DeviceMAC,
 			InUse:      false,
 		}
 		errCreateSensor := s.db.Model(&models.Sensor{}).Create(&sensor).Error
