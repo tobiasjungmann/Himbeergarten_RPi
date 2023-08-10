@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	pb "github.com/tobiasjungmann/Himbeergarten_RPi/server/proto"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/proto"
 	"net"
 	"os"
@@ -69,7 +73,12 @@ func handleConnection(conn net.Conn) {
 		if err := proto.Unmarshal(buf[:n], &activeSensors); err == nil {
 			log.Info("Received Active Sensor request from ", *activeSensors.DeviceMAC)
 
-			_, err := conn.Write([]byte("Hello World\n"))
+			msgInBytes, e := proto.Marshal(getActiveSensorsForDevice(&activeSensors))
+			if e != nil {
+				log.Info("Error while answering the client: ", err)
+				return
+			}
+			_, err := conn.Write(msgInBytes)
 			if err != nil {
 				log.Info("Error while answering the client: ", err)
 				return
@@ -77,10 +86,24 @@ func handleConnection(conn net.Conn) {
 			return
 		}
 	}
-	log.Info("failed to unmarshal:", err)
+	log.Info("failed to unmarshal - Message did not match any Message Format:", err)
+}
 
-	/*log.Printf("{DeviceID:%s, Humidity:%d}\n",
-	e.GetDeviceId(),
-	e.GetHumidity())*/
+func getActiveSensorsForDevice(sensors *pb.GetActiveSensorsRequest) *pb.GetActiveSensorsReply {
+	address := fmt.Sprintf("%s:%d", *ipStorage, portStorage)
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	log.Info("Forwarder connecting to ", address)
+	if err != nil {
+		log.Error(err)
+	}
+	c := pb.NewHumidityStorageClient(conn)
+	s, _ := generateToken()
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", s)
 
+	res, errStore := c.GetActiveSensorsForDevice(ctx, sensors)
+
+	if errStore != nil {
+		log.Error(errStore.Error())
+	}
+	return res
 }

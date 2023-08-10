@@ -24,7 +24,7 @@ const bool deepSleep = false;  // set to true if the device should deepsleep (Co
 smart_home_StoreHumidityRequest message = smart_home_StoreHumidityRequest_init_zero;
 WiFiClient client;
 
-static uint8_t sensors[] = {A0};  // Sensor setupt D1 Mini
+static uint8_t sensors[] = { A0 };  // Sensor setupt D1 Mini
 
 void setup() {
   Serial.begin(115200);
@@ -98,10 +98,10 @@ void sendToForwarder() {
   Serial.println("");
 }
 
-void getSensors(){
+void getSensors() {
   smart_home_GetActiveSensorsRequest getSensorMsg = smart_home_GetActiveSensorsRequest_init_zero;
-   strcpy(getSensorMsg.deviceMAC, WiFi.macAddress().c_str());
-   uint8_t buffer[128];
+  strcpy(getSensorMsg.deviceMAC, WiFi.macAddress().c_str());
+  uint8_t buffer[128];
   pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
 
   bool status = pb_encode(&stream, smart_home_GetActiveSensorsRequest_fields, &getSensorMsg);
@@ -111,10 +111,17 @@ void getSensors(){
     return;
   }
   client.write(buffer, stream.bytes_written);
-    String line = client.readStringUntil('\n');
- 
+  String line = client.readStringUntil('\n');
+  // recv proto message and parse back to its original value - nanopb anschauen
+
   Serial.println("Server response: " + line);
- client.stop();
+  smart_home_GetActiveSensorsReply reply = smart_home_GetActiveSensorsReply_init_default;
+  pb_istream_t istream = pb_istream_from_buffer(reinterpret_cast<const unsigned char*>(line.c_str()) , line.length());
+
+  if (pb_decode(&istream, smart_home_GetActiveSensorsReply_fields, &reply)) {
+    Serial.print("Parsing successful");//reply.sensors);
+  }
+  client.stop();
 }
 
 void loop() {
