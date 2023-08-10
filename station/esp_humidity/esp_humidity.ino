@@ -1,4 +1,5 @@
-#include <ESP8266WiFi.h>
+//#include <ESP8266WiFi.h>
+#include <WiFi.h>
 
 #include "src/humidityStorage.pb.h"
 
@@ -10,7 +11,7 @@
 /*  === Replace by actual values ===  */
 const char* ssid = "aaaa";           // The SSID (name) of the Wi-Fi network you want to connect to
 const char* password = "asdasdasd";  // The password of the Wi-Fi network
-const char* addr = "192.168.0.6";    // Ip address of the forwarder interface
+const char* addr = "192.168.0.4";    // Ip address of the forwarder interface
 const uint16_t port = 12348;         // Port of the forwarder interface
 
 // Source: https://how2electronics.com/interface-capacitive-soil-moisture-sensor-arduino/
@@ -23,6 +24,7 @@ const bool deepSleep = false;  // set to true if the device should deepsleep (Co
 smart_home_StoreHumidityRequest message = smart_home_StoreHumidityRequest_init_zero;
 WiFiClient client;
 
+static uint8_t sensors[] = {A0};  // Sensor setupt D1 Mini
 
 void setup() {
   Serial.begin(115200);
@@ -36,8 +38,8 @@ void setup() {
 }
 
 
-void getMoistureValues() {
-  int soilMoistureValue = analogRead(A0);
+void getMoistureValues(uint8_t sensor) {
+  int soilMoistureValue = analogRead(sensor);
   Serial.println(soilMoistureValue);
   int soilMoisturePercent = map(soilMoistureValue, AirValue, WaterValue, 0, 100);
   if (soilMoisturePercent > 100) {
@@ -96,18 +98,41 @@ void sendToForwarder() {
   Serial.println("");
 }
 
+void getSensors(){
+  smart_home_GetActiveSensorsRequest getSensorMsg = smart_home_GetActiveSensorsRequest_init_zero;
+   strcpy(getSensorMsg.deviceMAC, WiFi.macAddress().c_str());
+   uint8_t buffer[128];
+  pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
+
+  bool status = pb_encode(&stream, smart_home_GetActiveSensorsRequest_fields, &getSensorMsg);
+
+  if (!status) {
+    Serial.println("Failed to encode");
+    return;
+  }
+
+  Serial.printf("Amount of Bytes %d\n", stream.bytes_written);
+  for (int i = 0; i < stream.bytes_written; i++) {
+    Serial.printf("%02X", buffer[i]);
+  }
+
+  client.write(buffer, stream.bytes_written);
+}
 
 void loop() {
   if (waitForConnection()) {
-    getMoistureValues();
-    strcpy(message.deviceId, WiFi.macAddress().c_str());
-    message.sensorId = 0;
-    sendToForwarder();
+    getSensors();
+    /*for (int i = 0; i < sizeof(sensors); i++) {
+      getMoistureValues(sensors[i]);
+      strcpy(message.deviceMAC, WiFi.macAddress().c_str());
+      message.sensorId = 0;
+      sendToForwarder();
+    }*/
   }
   if (deepSleep) {
-    ESP.deepSleep(60e9);  // 1h 
+    ESP.deepSleep(60e9);  // 1h
     yield();
   } else {
-    delay(5000);
+    delay(2000);
   }
 }

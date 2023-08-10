@@ -59,15 +59,22 @@ func handleConnection(conn net.Conn) {
 	}
 
 	var e pb.StoreHumidityRequest
-	if err := proto.Unmarshal(buf[:n], &e); err != nil {
+	if err := proto.Unmarshal(buf[:n], &e); err == nil {
 		log.Info("failed to unmarshal:", err)
+		forwardData(e.GetDeviceId(), e.GetSensorId(),
+			e.GetHumidity(), e.GetHumidityInPercent())
 		return
+	} else {
+		e = pb.getActiveSensorRequest
+		if err := proto.Unmarshal(buf[:n], &e); err != nil {
+			log.Info("failed to unmarshal:", err)
+
+			return
+		}
 	}
 
 	/*log.Printf("{DeviceID:%s, Humidity:%d}\n",
 	e.GetDeviceId(),
 	e.GetHumidity())*/
-	forwardData(e.GetDeviceId(), e.GetSensorId(),
-		e.GetHumidity(), e.GetHumidityInPercent())
 
 }
