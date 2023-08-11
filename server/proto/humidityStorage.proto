@@ -22,8 +22,10 @@ message StoreHumidityReply{
 message GetActiveSensorsRequest{
   required string deviceMAC = 1;
   repeated uint32 availableSensors = 2;
+  required uint32 sensorCount=3;
 }
 
 message GetActiveSensorsReply{
   repeated uint32 sensors = 1;
+  required uint32 sensorCount=2;
 }

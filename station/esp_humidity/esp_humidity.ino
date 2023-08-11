@@ -7,11 +7,12 @@
 #include "pb.h"
 #include "pb_encode.h"
 #include "pb_decode.h"
+//#include "nanopb.h"
 
 /*  === Replace by actual values ===  */
-const char* ssid = "aaaa";           // The SSID (name) of the Wi-Fi network you want to connect to
-const char* password = "asdasdasd";  // The password of the Wi-Fi network
-const char* addr = "192.168.0.4";    // Ip address of the forwarder interface
+const char *ssid = "aaaa";           // The SSID (name) of the Wi-Fi network you want to connect to
+const char *password = "asdasdasd";  // The password of the Wi-Fi network
+const char *addr = "192.168.0.4";    // Ip address of the forwarder interface
 const uint16_t port = 12348;         // Port of the forwarder interface
 
 // Source: https://how2electronics.com/interface-capacitive-soil-moisture-sensor-arduino/
@@ -25,6 +26,7 @@ smart_home_StoreHumidityRequest message = smart_home_StoreHumidityRequest_init_z
 WiFiClient client;
 
 static uint8_t sensors[] = { A0 };  // Sensor setupt D1 Mini
+#define MAX_SENSOR_COUNT 16;
 
 void setup() {
   Serial.begin(115200);
@@ -98,11 +100,32 @@ void sendToForwarder() {
   Serial.println("");
 }
 
+
+bool handle_sensors_callback(pb_istream_t *stream, const pb_field_t *field, void **arg) {
+  smart_home_GetActiveSensorsReply *msg = (smart_home_GetActiveSensorsReply *)(*arg);
+  uint32_t value;
+
+  if (!pb_decode_varint32(stream, &value)) {
+    return false;
+  }
+
+  // Append the value to the repeated field
+  if (msg->sensorCount < 16) {
+    //msg->sensors[msg->sensorCount++] = value;
+    Serial.printf("Value parsed: %i\n",value);
+   // msg->sensors.
+    return true;
+  }
+
+  return false;
+}
+
 void getSensors() {
   smart_home_GetActiveSensorsRequest getSensorMsg = smart_home_GetActiveSensorsRequest_init_zero;
   strcpy(getSensorMsg.deviceMAC, WiFi.macAddress().c_str());
   uint8_t buffer[128];
-  pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
+  // todo potentially cahnge to os_stream_from_socket https://github.com/nanopb/nanopb/blob/master/examples/network_server/client.c#L30
+  pb_ostream_t stream = pb_ostream_from_buffer(buffer, 12);//sizeof(buffer));
 
   bool status = pb_encode(&stream, smart_home_GetActiveSensorsRequest_fields, &getSensorMsg);
 
@@ -116,11 +139,53 @@ void getSensors() {
 
   Serial.println("Server response: " + line);
   smart_home_GetActiveSensorsReply reply = smart_home_GetActiveSensorsReply_init_default;
-  pb_istream_t istream = pb_istream_from_buffer(reinterpret_cast<const unsigned char*>(line.c_str()) , line.length());
+  pb_istream_t istream = pb_istream_from_buffer(reinterpret_cast<const unsigned char *>(line.c_str()), line.length());
 
-  if (pb_decode(&istream, smart_home_GetActiveSensorsReply_fields, &reply)) {
-    Serial.print("Parsing successful");//reply.sensors);
-  }
+if (!pb_decode_delimited(&istream, smart_home_GetActiveSensorsReply_fields, &reply))
+        {
+            fprintf(stderr, "Decode failed: %s\n", PB_GET_ERROR(&istream));
+            //return false;
+        }
+ /* const pb_field_t reply_fields[] = {
+    smart_home_GetActiveSensorsReply_sensors_tag,
+     {
+        pb_callback_t(smart_home_GetActiveSensorsReply, sensors, &handle_sensors_callback),
+        smart_home_GetActiveSensorsReply_sensorCount_tag, {
+            pb_encode(2, &getSensorMsg.sensorCount),
+            1, false, 0, uint32_t,
+        },
+    },
+    smart_home_GetActiveSensorsReply_sensorCount_tag,
+    {
+      pb_encode(2, &getSensorMsg.sensorCount),
+      1,
+      false,
+      0,
+      pb_type_uint32_t,
+    },
+  };
+
+  if (!pb_decode(&stream, reply_fields, &getSensorMsg)) {
+    return false;
+  }*/
+
+  // Serial.println(((uint8_t*)reply.sensors.arg)[0]);
+  //reply.sensors
+  /*const pb_field_t smart_home_GetActiveSensorsReply_fields[] = {
+        // Other fields...
+        smart_home_GetActiveSensorsReply_sensors_tag, {
+            pb_callback_t {
+                .funcs.decode = &handle_sensors_callback,
+                .arg = &msg,
+            },
+            0, false, pb_membersize(smart_home_GetActiveSensorsReply, sensors), pb_type_uint8_t,
+        },
+        // More fields...
+    };
+     if (pb_decode(&istream, smart_home_GetActiveSensorsReply_fields, &reply)) {
+    Serial.println("Parsing successful");//reply.sensors);
+    };
+  }*/
   client.stop();
 }
 

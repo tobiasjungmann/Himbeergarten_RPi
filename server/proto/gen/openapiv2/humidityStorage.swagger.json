@@ -53,6 +53,10 @@
             "type": "integer",
             "format": "int64"
           }
+        },
+        "sensorCount": {
+          "type": "integer",
+          "format": "int64"
         }
       }
     },

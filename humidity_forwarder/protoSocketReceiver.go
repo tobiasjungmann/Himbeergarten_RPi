@@ -73,7 +73,10 @@ func handleConnection(conn net.Conn) {
 		if err := proto.Unmarshal(buf[:n], &activeSensors); err == nil {
 			log.Info("Received Active Sensor request from ", *activeSensors.DeviceMAC)
 
-			msgInBytes, e := proto.Marshal(getActiveSensorsForDevice(&activeSensors))
+			testArray := []uint32{1, 2, 3, 4, 5}
+			testreply := pb.GetActiveSensorsReply{Sensors: testArray}
+			msgInBytes, e := proto.Marshal(&testreply)
+			//msgInBytes, e := proto.Marshal(getActiveSensorsForDevice(&activeSensors))
 			if e != nil {
 				log.Info("Error while answering the client: ", err)
 				return
