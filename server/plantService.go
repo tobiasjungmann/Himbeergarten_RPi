@@ -22,7 +22,7 @@ func (s *PlantStorage) AddNewPlant(_ context.Context, request *pb.AddPlantReques
 	}
 
 	// todo check that the sensor does actually exist
-	var errCreatePlant error
+	var err error
 	if result.RowsAffected > 0 {
 		log.Println("Existing plant will be updated")
 		plant.Name = request.Name
@@ -35,21 +35,21 @@ func (s *PlantStorage) AddNewPlant(_ context.Context, request *pb.AddPlantReques
 			Info:   request.Info,
 			Sensor: request.SensorId,
 		}
-		errCreatePlant = s.db.Model(&models.Plant{}).Create(&plant).Error
+		err = s.db.Model(&models.Plant{}).Create(&plant).Error
 		log.Println("New plant added")
 	}
 
-	if errCreatePlant != nil {
-		log.Fatalf("Error: Unable to create the new Plant. Errormessage: %s", errCreatePlant.Error())
+	if err != nil {
+		log.Fatalf("Error: Unable to create the new Plant. Errormessage: %s", err.Error())
 	}
 
 	for _, v := range request.Images {
 		path := fmt.Sprintf("%s%d", "plant_", plant.Plant)
 		resPath := utils.StoreImageInNewFile(v.ImageBytes, path, v.ImageId, true)
 		imageEntry := models.ImageEntry{Plant: plant.Plant, Path: resPath}
-		errCreateImage := s.db.Model(&models.ImageEntry{}).Create(&imageEntry).Error
-		if errCreateImage != nil {
-			log.Fatalf("Error: Unable to create the new Image. Errormessage: %s", errCreateImage.Error())
+
+		if err := s.db.Model(&models.ImageEntry{}).Create(&imageEntry).Error; err != nil {
+			log.Fatalf("Error: Unable to create the new Image. Errormessage: %s", err.Error())
 		} else {
 			log.Println("New image added for plant: ", request.PlantId)
 		}
@@ -65,12 +65,10 @@ func (s *PlantStorage) AddNewPlant(_ context.Context, request *pb.AddPlantReques
 }
 
 func (s *PlantStorage) DeletePlant(_ context.Context, request *pb.PlantRequest) (*pb.DeletePlantReply, error) {
-	errGetPlant := s.db.Model(&models.Plant{}).Delete(&models.Plant{}, request.Plant).Error
-	if errGetPlant != nil {
-		log.Fatalf("Error: Plant with Id: %d could not be deleted. Errormessage: %s", request.Plant, errGetPlant.Error())
+	if err := s.db.Delete(&models.Plant{}, request.Plant).Error; err != nil {
+		log.Fatalf("Error: Plant with Id: %d could not be deleted. Errormessage: %s", request.Plant, err.Error())
 	}
-	err := os.RemoveAll(fmt.Sprintf("Storage/plants/plant_%d/", request.Plant))
-	if err != nil {
+	if err := os.RemoveAll(fmt.Sprintf("Storage/plants/plant_%d/", request.Plant)); err != nil {
 		log.Error("Unable to delete existing images for deleted plant %d: %s", request.Plant, err)
 	}
 	return &pb.DeletePlantReply{}, nil
@@ -99,14 +97,13 @@ func (s *PlantStorage) GetOverviewAllPlants(_ context.Context, _ *pb.GetAllPlant
 
 func (s *PlantStorage) GetAdditionalDataPlant(_ context.Context, request *pb.GetAdditionalDataPlantRequest) (*pb.GetAdditionalDataPlantReply, error) {
 	var plant models.Plant
-	err := s.db.Where(models.Plant{Plant: request.PlantId}).FirstOrInit(&plant).Error
-	if err != nil {
+
+	if err := s.db.Where(models.Plant{Plant: request.PlantId}).FirstOrInit(&plant).Error; err != nil {
 		log.Fatalf("Error: Plant with Id: %d does not exist yet. Errormessage: %s", request.PlantId, err.Error())
 	}
 
 	var humidityEntries []models.HumidityEntry
-	errHumidity := s.db.Where(models.HumidityEntry{Sensor: plant.Sensor}).Find(&humidityEntries).Error
-	if errHumidity != nil {
+	if err := s.db.Where(models.HumidityEntry{Sensor: plant.Sensor}).Find(&humidityEntries).Error; err != nil {
 		log.Fatalf("Error: Plant with Id: %d unable to query Humidity entries. Errormessage: %s", request.PlantId, err.Error())
 	}
 	convertedHumidity := make([]*pb.HumidityMsg, len(humidityEntries))
@@ -118,8 +115,8 @@ func (s *PlantStorage) GetAdditionalDataPlant(_ context.Context, request *pb.Get
 	}
 
 	var imageEntries []models.ImageEntry
-	errImage := s.db.Where(models.ImageEntry{Plant: request.PlantId}).Find(&imageEntries).Error
-	if errImage != nil {
+
+	if err := s.db.Where(models.ImageEntry{Plant: request.PlantId}).Find(&imageEntries).Error; err != nil {
 		log.Fatalf("Error: Plant with Id: %d unable to query Images entries. Errormessage: %s", request.PlantId, err.Error())
 	}
 	convertedImages := make([]*pb.ImageMsg, len(imageEntries))
