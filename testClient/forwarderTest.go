@@ -64,7 +64,7 @@ func sendHumidityToForwarderGRPC() {
 		Humidity:          &humidity,
 		SensorId:          &sensorId,
 		HumidityInPercent: &humidityInPercent,
-		DeviceId:          &deviceMAC,
+		DeviceMAC:         &deviceMAC,
 	})
 
 	if err != nil {

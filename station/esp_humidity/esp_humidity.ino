@@ -140,6 +140,9 @@ bool handle_sensors_callback(pb_istream_t *stream, const pb_field_t *field, void
   return false;
 }
 
+/*
+query the sensors which should be measured for this device
+*/
 void getSensors() {
   smart_home_GetActiveSensorsRequest getSensorMsg = smart_home_GetActiveSensorsRequest_init_zero;
   strcpy(getSensorMsg.deviceMAC, WiFi.macAddress().c_str());

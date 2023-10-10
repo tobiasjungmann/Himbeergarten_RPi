@@ -57,20 +57,12 @@ func (s server) GetActiveSensorsForDevice(_ context.Context, request *pb.GetActi
 		Where(models.Sensor{DeviceMAC: *request.DeviceMAC}).
 		First(&sensor).Error
 
-	var sensors []uint32
+	var sensors []int32
 
 	if err != nil {
 		log.WithError(err).Error("Creating new Sensors.")
-		for _, sensor := range request.AvailableSensors {
-			sensor := models.Sensor{
-				SensorSlot: sensor,
-				DeviceMAC:  *request.DeviceMAC,
-				InUse:      false,
-			}
-
-			if err := s.db.Create(&sensor).Error; err != nil {
-				log.Fatalf("Error: Unable to create the new Plant. Errormessage: %s", err.Error())
-			}
+		for _, sens := range request.AvailableSensors {
+			createSensor(sens, request.GetDeviceMAC(), s.db)
 		}
 	} else {
 		// Device already exists - which sensors are already loaded? todo query for all which are set to active
@@ -84,37 +76,40 @@ func (s server) GetActiveSensorsForDevice(_ context.Context, request *pb.GetActi
 	return &pb.GetActiveSensorsReply{Sensors: sensors}, nil
 }
 
+func createSensor(sensorId int32, deviceMac string, db *gorm.DB) models.Sensor {
+	sensor := models.Sensor{
+		SensorSlot: sensorId,
+		DeviceMAC:  deviceMac,
+		InUse:      false,
+	}
+
+	if err := db.Create(&sensor).Error; err != nil {
+		log.Fatalf("Error: Unable to create the new Plant. Errormessage: %s", err.Error())
+	}
+	return sensor
+}
+
 func (s server) StoreHumidityEntry(_ context.Context, request *pb.StoreHumidityRequest) (*pb.StoreHumidityReply, error) {
 	var sensor models.Sensor
 	result := s.db.Model(&models.Sensor{}).
 		Where(models.Sensor{SensorSlot: *request.SensorId, DeviceMAC: *request.DeviceMAC}).
 		First(&sensor).Error
-	sensorId := sensor.Sensor
-	if result != nil {
-		log.WithError(result).Error("Creating new Sensor.")
-		sensor := models.Sensor{
-			SensorSlot: *request.SensorId,
-			DeviceMAC:  *request.DeviceMAC,
-			InUse:      false,
-		}
-		errCreateSensor := s.db.Model(&models.Sensor{}).Create(&sensor).Error
-		if errCreateSensor != nil {
-			log.Fatalf("Error: Unable to create the new Plant. Errormessage: %s", errCreateSensor.Error())
-		}
 
-		sensorId = sensor.Sensor
+	if result != nil {
+		sensor = createSensor(request.GetSensorId(), request.GetDeviceMAC(), s.db)
 	}
 
 	err := s.db.Model(&models.HumidityEntry{}).Create(&models.HumidityEntry{
-		Sensor:         sensorId,
+		Sensor:         sensor.Sensor,
 		Value:          *request.Humidity,
 		ValueInPercent: *request.HumidityInPercent,
 		Timestamp:      time.Now(),
 	}).Error
+
 	if err != nil {
-		log.Fatalf("Error: New Humidity Entry for Plant %d with value %d was not created. Errormessage: %s", sensorId, request.GetHumidity(), err.Error())
+		log.Fatalf("Error: New Humidity Entry for Plant %d with value %d was not created. Errormessage: %s", sensor.Sensor, request.GetHumidity(), err.Error())
 	} else {
-		log.Println("New Humidity Entry for Plant %i with value %i", sensorId, request.GetHumidity())
+		log.Println("New Humidity Entry for Plant %i with value %i", sensor.Sensor, request.GetHumidity())
 	}
 	return &pb.StoreHumidityReply{}, nil
 }
