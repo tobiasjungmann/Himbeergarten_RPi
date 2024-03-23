@@ -28,7 +28,7 @@ type Attributes struct {
 
 func ForwardToHA(deviceId string, sensorId int32, humidity int32, humidityInPercent int32) {
 	macForURL := strings.Replace(deviceId, ":", "_", 5)
-	url := fmt.Sprintf("http://%s:8123/api/states/sensor.esp_%s_hum_%d_", *ipHa, macForURL, sensorId)
+	url := fmt.Sprintf("http://%s:8123/api/states/sensor.esp_%s-%d_hum", *ipHa, macForURL, sensorId)
 	log.Info("HA Address: ", url)
 	sendRequest(fmt.Sprintf("%sraw", url), generatePayloadHumidity(humidity))
 	sendRequest(fmt.Sprintf("%spercent", url), generatePayloadHumidityPercent(humidityInPercent))
