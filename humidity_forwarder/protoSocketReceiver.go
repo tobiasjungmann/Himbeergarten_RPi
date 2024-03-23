@@ -27,6 +27,7 @@ func handleProtoBasedSocket() {
 		}
 	}(ln)
 
+	log.Println("Starting to accept connections")
 	for {
 		conn, err := ln.Accept()
 		if err != nil {

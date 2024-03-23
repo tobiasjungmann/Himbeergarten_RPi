@@ -27,6 +27,7 @@ type server struct {
 }
 
 func main() {
+	log.Info("Starting Forwarder...")
 	flag.Parse()
 	if !*restReceiver && !*bluetoothReceiver && !*protoReceiver && !*grpcReceiver {
 		log.Fatalf("no API format selected. Set at least one.")
