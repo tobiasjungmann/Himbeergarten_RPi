@@ -5,7 +5,7 @@ import log "github.com/sirupsen/logrus"
 const (
 	testPlantStorage  = false
 	testForwarderGRPC = false
-	testForwarderWeb  = false
+	testForwarderWeb  = true
 )
 
 func main() {
